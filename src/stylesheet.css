@@ -1,0 +1,13 @@
+.noback {
+    background-color: transparent;
+}
+
+.noback:drop(active)
+{
+	border: none;
+	box-shadow: none;
+}
+.kanbancard {
+    background-color: rgb(252, 228, 134);
+}
+

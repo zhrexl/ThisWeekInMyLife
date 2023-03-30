@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <requires lib="libadwaita" version="1.0"/>
+  <template class="KanbanColumn" parent="GtkBox">
+  <style>
+    <class name="noback"/>
+  </style>
+  <property name="orientation">vertical</property>
+  <property name="margin-start">10</property>
+  <property name="margin-top">10</property>
+  <property name="margin-end">10</property>
+  <property name="margin-bottom">10</property>
+  <property name="spacing">5</property>
+  <child>
+    <object class="GtkBox">
+      <property name="orientation">horizontal</property>
+      <property name="homogeneous">true</property>
+      <child>
+        <object class="GtkEditableLabel" id="title">
+        <style>
+          <class name="heading"/>
+        </style>
+        </object>
+      </child>
+      <child>
+        <object class="GtkButton">
+          <property name="halign">end</property>
+        <signal name="clicked" handler="add_card_clicked" object="KanbanColumn" swapped="no"/>
+        <property name="child">
+          <object class="AdwButtonContent">
+            <property name="icon-name">list-add-symbolic</property>
+          </object>
+        </property>
+        <style>
+          <class name="flat"/>
+        </style>
+        </object>
+      </child>
+    </object>
+  </child> <!-- GtkBox HeaderSuffix -->
+  <child>
+    <object class="GtkScrolledWindow">
+    <child>
+      <object class="GtkListBox" id="CardsBox">
+      <property name="vexpand">true</property>
+      <property name="hexpand">true</property>
+      <property name="margin-start">2</property>
+      <property name="margin-top">2</property>
+      <property name="margin-end">2</property>
+      <property name="margin-bottom">2</property>
+      <style>
+        <class name="noback"/>
+      </style>
+      </object>
+    </child>
+    </object>
+  </child>
+  </template>
+</interface>

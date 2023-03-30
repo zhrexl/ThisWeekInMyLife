@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/zhrexl/kanban">
+    <file preprocess="xml-stripblanks">kanban-window.ui</file>
+    <file preprocess="xml-stripblanks">kanban-card.ui</file>
+    <file preprocess="xml-stripblanks">kanban-column.ui</file>
+    <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
+    <file>stylesheet.css</file>
+  </gresource>
+</gresources>

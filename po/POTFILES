@@ -1,0 +1,6 @@
+data/com.github.zhrexl.kanban.desktop.in
+data/com.github.zhrexl.kanban.appdata.xml.in
+data/com.github.zhrexl.kanban.gschema.xml
+src/main.c
+src/kanban-window.c
+src/kanban-window.ui
