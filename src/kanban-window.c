@@ -128,7 +128,8 @@ item_drag_drop (GtkDropTarget *dest,
 
   kanban_column_remove_card (old_col, card);
 
-  KanbanColumn* col = KANBAN_COLUMN (gtk_event_controller_get_widget (GTK_EVENT_CONTROLLER (dest)));
+  KanbanColumn* col = KANBAN_COLUMN (gtk_event_controller_get_widget (
+                                     GTK_EVENT_CONTROLLER (dest)));
   kanban_column_add_card (col,card);
   g_object_unref (card);
 
@@ -142,15 +143,13 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 
   for (GList* child = list; child != NULL; child = child->next)
   {
-    const gchar* objectname = child->data;
+    const gchar*  objectname  = child->data;
+    JsonNode*     member      = json_object_get_member (object, objectname);
+    JsonObject*   objmember   = json_node_get_object (member);
 
-    //g_print("%s\n", objectname);
+    const gchar*  description = json_object_get_string_member (objmember,
+                                                              "description");
 
-    JsonNode* member = json_object_get_member (object, objectname);
-    JsonObject* objmember = json_node_get_object (member);
-
-    const gchar* description = json_object_get_string_member (objmember, "description");
-    //g_print("%s\n", description);
     kanban_column_add_new_card (Column, objectname, description);
   }
 
@@ -161,6 +160,12 @@ int loadjson (KanbanWindow* self, gchar* file_path)
 {
   JsonParser* parser = json_parser_new ();
   GError* error = NULL;
+
+  if(!g_file_test (file_path, G_FILE_TEST_EXISTS))
+  {
+      g_print("No Json was found! Creating a new one...\n");
+      return 1;
+  }
   if (!json_parser_load_from_file(parser, file_path, &error)) {
     g_printerr ("Error parsing JSON: %s\n", error->message);
     g_error_free (error);
@@ -178,25 +183,29 @@ int loadjson (KanbanWindow* self, gchar* file_path)
 
   GList* objects = json_object_get_members (object);
 
+  if(!g_list_length (objects))
+    return 1;
 
   for (GList* child = objects; child != NULL; child = child->next)
   {
-    const char* object_name = child->data;
-    KanbanColumn* column  = kanban_column_new ();
-    GtkDropTarget* target = gtk_drop_target_new (G_TYPE_POINTER, GDK_ACTION_COPY);
+    const char*     object_name = child->data;
+    KanbanColumn*   column      = kanban_column_new ();
+    GtkDropTarget*  target      = gtk_drop_target_new (G_TYPE_POINTER,
+                                                       GDK_ACTION_COPY);
+
     g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
 
     kanban_column_set_title (column, object_name);
     kanban_column_set_provider(column, self->provider);
     gtk_box_append (self->mainBox, GTK_WIDGET (column));
-    gtk_widget_add_controller (GTK_WIDGET (column), GTK_EVENT_CONTROLLER (target));
+    gtk_widget_add_controller (GTK_WIDGET (column),
+                               GTK_EVENT_CONTROLLER (target));
 
     self->ListOfColumns = g_list_append (self->ListOfColumns, column);
 
     JsonNode* node = json_object_get_member (object, object_name);
     create_cards_from_json (column, node);
   }
-
   g_list_free (objects);
   g_object_unref (parser);
   return 0;
@@ -210,17 +219,15 @@ kanban_window_init (KanbanWindow *self)
 
   /* Load CSS */
   self->provider = GTK_STYLE_PROVIDER (gtk_css_provider_new ());
-  gtk_css_provider_load_from_resource (GTK_CSS_PROVIDER (self->provider), "/com/github/zhrexl/kanban/stylesheet.css");
+  gtk_css_provider_load_from_resource (GTK_CSS_PROVIDER (self->provider),
+                                       "/com/github/zhrexl/kanban/stylesheet.css");
 
   /* Restore json */
   const gchar* home_dir = g_get_home_dir ();
-  gchar* file_path = g_strdup_printf ("%s/.thisweekinmylife.json", home_dir);
+  gchar* file_path      = g_strdup_printf ("%s/.thisweekinmylife.json",
+                                           home_dir);
 
-
-  if (g_file_test (file_path, G_FILE_TEST_EXISTS)) {
-    loadjson (self, file_path);
-  }
-  else
+  if (loadjson (self, file_path))
   {
     for (int i = 0; i < 5; i++)
     {
