@@ -74,12 +74,13 @@ save_cards(gpointer user_data)
   json_node_take_object (root, CardObject);
   json_generator_set_root (generator, root);
 
-  g_object_set (generator, "pretty", true, NULL);
+  g_object_set (generator, "pretty", false, NULL);
   data = json_generator_to_data (generator, &len);
 
   //g_print("checking nested object %s",data);
   const gchar* home_dir = g_get_home_dir ();
-  gchar* file_path = g_strdup_printf ("%s/.thisweekinmylife.json", home_dir);
+  // TODO: file_path should be a global file
+  gchar* file_path = g_strdup_printf ("%s/.thisweekinmylife", home_dir);
 
   GError* error = NULL;
   g_file_set_contents (file_path, data, -1, &error);
@@ -149,8 +150,9 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 
     const gchar*  description = json_object_get_string_member (objmember,
                                                               "description");
+    gboolean revealed = json_object_get_int_member (objmember, "revealed");
 
-    kanban_column_add_new_card (Column, objectname, description);
+    kanban_column_add_new_card (Column, objectname, description, revealed);
   }
 
   g_list_free(list);
@@ -210,21 +212,14 @@ int loadjson (KanbanWindow* self, gchar* file_path)
   g_object_unref (parser);
   return 0;
 }
-static void
-kanban_window_init (KanbanWindow *self)
+static gboolean
+load_ui(KanbanWindow* self)
 {
   const char* Weekdays[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
 
-  gtk_widget_init_template (GTK_WIDGET (self));
-
-  /* Load CSS */
-  self->provider = GTK_STYLE_PROVIDER (gtk_css_provider_new ());
-  gtk_css_provider_load_from_resource (GTK_CSS_PROVIDER (self->provider),
-                                       "/com/github/zhrexl/kanban/stylesheet.css");
-
   /* Restore json */
   const gchar* home_dir = g_get_home_dir ();
-  gchar* file_path      = g_strdup_printf ("%s/.thisweekinmylife.json",
+  gchar* file_path      = g_strdup_printf ("%s/.thisweekinmylife",
                                            home_dir);
 
   if (loadjson (self, file_path))
@@ -249,4 +244,19 @@ kanban_window_init (KanbanWindow *self)
   g_timeout_add (1000, (GSourceFunc)save_cards, self);
 
   g_free(file_path);
+
+  return FALSE;
+}
+static void
+kanban_window_init (KanbanWindow *self)
+{
+
+  gtk_widget_init_template (GTK_WIDGET (self));
+
+  /* Load CSS */
+  self->provider = GTK_STYLE_PROVIDER (gtk_css_provider_new ());
+  gtk_css_provider_load_from_resource (GTK_CSS_PROVIDER (self->provider),
+                                       "/com/github/zhrexl/kanban/stylesheet.css");
+
+  g_idle_add ((GSourceFunc)load_ui, self);
 }

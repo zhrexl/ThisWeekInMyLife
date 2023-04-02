@@ -14,6 +14,11 @@
             <style>
               <class name="flat"/>
             </style>
+            <child type="start">
+              <object class="GtkButton">
+                <property name="icon-name">document-save-symbolic</property>
+              </object>
+            </child>
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>

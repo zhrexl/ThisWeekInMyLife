@@ -28,11 +28,20 @@ struct _KanbanCard
 {
   GtkListBoxRow parent_instance;
 
+  GtkBox*         handlerDrag;
   GtkEditableLabel* LblCardName;
   GtkRevealer* revealercard;
   GtkTextView   *description;
   AdwButtonContent* BtnContent;
 };
+
+const gchar checktemplate[] = "<task status=";
+const gchar donexml[]          = "done";
+const gchar progress[]      = "progress";
+const gchar titlexml[]         = " title=\"";
+const gchar endtitle[]      = "\"/>";
+const gchar nullbyte[]      = "\0";
+
 
 G_DEFINE_FINAL_TYPE (KanbanCard, kanban_card, GTK_TYPE_LIST_BOX_ROW)
 
@@ -54,25 +63,220 @@ kanban_card_get_title(KanbanCard* Card)
   return gtk_editable_get_text (GTK_EDITABLE (Card->LblCardName));
 }
 
-gchar*
-kanban_card_get_description(KanbanCard* Card)
+gboolean
+kanban_card_get_reveal(KanbanCard* Card)
 {
-  GtkTextBuffer* Buffer = gtk_text_view_get_buffer(Card->description);
-  GtkTextIter start, end;
-
-  gtk_text_buffer_get_bounds (Buffer, &start, &end);
-
-  return gtk_text_buffer_get_text (Buffer, &start, &end, FALSE);
+  return gtk_revealer_get_reveal_child (Card->revealercard);
 }
 
 void
-kanban_card_set_description(KanbanCard* Card,const gchar* description)
+kanban_card_set_reveal(KanbanCard* card, gboolean revealed)
 {
-  GtkTextBuffer* Buffer = gtk_text_view_get_buffer(Card->description);
-  gtk_text_buffer_set_text (Buffer, description, strlen(description));
+  if (!revealed)
+  {
+    adw_button_content_set_icon_name (card->BtnContent, "go-down-symbolic");
+    gtk_widget_set_can_target (GTK_WIDGET(card->LblCardName), false);
+    gtk_widget_set_can_focus (GTK_WIDGET(card->LblCardName), false);
+  }
+  else
+  {
+    adw_button_content_set_icon_name (card->BtnContent, "go-up-symbolic");
+    gtk_widget_set_can_target (GTK_WIDGET(card->LblCardName), true);
+    gtk_widget_set_can_focus (GTK_WIDGET(card->LblCardName), true);
+  }
+  gtk_revealer_set_reveal_child (card->revealercard,revealed);
+
 }
 
+static GBytes*
+kanban_card_get_full_description(GtkTextBuffer *buffer)
+{
 
+
+  GtkTextIter start, end;
+
+  GByteArray* ret = g_byte_array_new();
+  gtk_text_buffer_get_bounds(buffer, &start, &end);
+
+  GtkTextIter pos0,pos1;
+  GtkTextChildAnchor* anch;
+
+  pos0 = start;
+  do {
+    pos1 = pos0;
+    gboolean not_end = TRUE;
+    while (anch = gtk_text_iter_get_child_anchor(&pos1), anch == NULL)
+    {
+      not_end = gtk_text_iter_forward_char(&pos1);
+      if (!not_end)
+        break;
+    }
+
+    gchar* text = gtk_text_iter_get_text(&pos0, &pos1);
+    g_byte_array_append(ret, (guint8*)text, strlen(text));
+    g_free(text);
+
+    pos0 = pos1;
+
+    if (!not_end && !anch)
+      continue;
+
+    guint widgets_len = 0;
+    GtkWidget** widgets = gtk_text_child_anchor_get_widgets(anch, &widgets_len);
+
+    if ((!widgets_len) || (!widgets)){
+      continue;
+    }
+
+    for (int i = 0; i < widgets_len; i++)
+    {
+      gboolean isChecked = false;
+      const gchar* tasklbl = NULL;
+
+      for (GtkWidget* child = gtk_widget_get_first_child (widgets[i]);
+                                                      child != NULL;
+                        child = gtk_widget_get_next_sibling (child))
+      {
+        if (GTK_IS_CHECK_BUTTON (child))
+          isChecked = gtk_check_button_get_active (GTK_CHECK_BUTTON (child));
+        else if (GTK_IS_EDITABLE_LABEL (child))
+          tasklbl = gtk_editable_get_text (GTK_EDITABLE(child));
+      }
+
+      g_byte_array_append(ret, (guint8*)checktemplate, strlen(checktemplate));
+
+      if (isChecked)
+         g_byte_array_append(ret, (guint8*)donexml, strlen(donexml));
+      else
+        g_byte_array_append(ret, (guint8*)progress, strlen(progress));
+
+      g_byte_array_append(ret, (guint8*)titlexml, strlen(titlexml));
+
+      int len = strlen(tasklbl);
+      if (len)
+        g_byte_array_append(ret, (guint8*)(tasklbl), len);
+
+      g_byte_array_append(ret, (guint8*)endtitle, strlen(endtitle));
+    }
+
+  } while (gtk_text_iter_forward_char(&pos0));
+
+  g_byte_array_append (ret, (guint8*)nullbyte, 1);
+
+  return g_byte_array_free_to_bytes(ret);
+}
+
+GBytes*
+kanban_card_get_description(KanbanCard* Card)
+{
+  GtkTextBuffer* Buffer = gtk_text_view_get_buffer(Card->description);
+
+  return kanban_card_get_full_description(Buffer);
+}
+static void
+create_task(GtkTextView* text_view, GtkTextIter* iter, const gchar* title, gboolean active)
+{
+
+  GtkTextChildAnchor* anchor = gtk_text_buffer_create_child_anchor (gtk_text_view_get_buffer (text_view), iter);
+  GtkWidget* box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
+  gtk_widget_set_margin_start (box, 5);
+
+  GtkWidget* label  = gtk_editable_label_new (title);
+  GtkWidget * child = gtk_check_button_new ();
+
+  gtk_check_button_set_active (GTK_CHECK_BUTTON (child), active);
+
+  gtk_box_append (GTK_BOX(box), child);
+  gtk_box_append (GTK_BOX(box), label);
+
+  //gtk_widget_set_size_request (child, 10, -1);
+  gtk_text_view_add_child_at_anchor (text_view, box, anchor);
+  //gtk_text_buffer_insert_at_cursor (buffer, "\n", 1);"
+}
+void
+kanban_card_set_description(KanbanCard* Card,const gchar* description)
+{
+  GtkTextBuffer* buf = gtk_text_view_get_buffer(Card->description);
+  gtk_text_buffer_set_text(buf, "", 0);
+  GtkTextIter end;
+
+  int dsc_len = strlen(description);
+
+  if (!dsc_len)
+    return;
+
+  gchar* dataptr = (gchar*)description;
+
+  gtk_text_buffer_get_end_iter(buf, &end);
+
+  while (dsc_len > 0)
+  {
+    gchar* n_dataptr = (gchar*)(g_strstr_len (dataptr, dsc_len, checktemplate));
+
+    if (n_dataptr == NULL)
+    {
+      gtk_text_buffer_insert(buf, &end, dataptr, dsc_len);
+      break;
+    }
+    else
+      gtk_text_buffer_insert(buf, &end, dataptr, n_dataptr-dataptr);
+
+    // Create Anchor Child
+    gtk_text_buffer_get_iter_at_offset (buf, &end, n_dataptr-description);
+
+    n_dataptr += sizeof(checktemplate)/sizeof(checktemplate[0]) -1;
+
+    gchar* title = g_strstr_len(n_dataptr, strlen(n_dataptr), titlexml);
+
+    if (title == NULL)
+    {
+      g_print("Corrupted json :(\n");
+      break;
+    }
+
+    gchar* done = g_strstr_len(n_dataptr,title-n_dataptr,"done");
+    gboolean active = false;
+
+    if (done)
+      active = true;
+    else
+      active= false;
+
+    title+= sizeof(titlexml)/sizeof(titlexml[0]) - 1;
+
+    gchar* next = g_strstr_len(title, strlen(title), endtitle);
+
+    if (!next)
+    {
+      g_print("Corrupted json :(\n");
+      break;
+    }
+
+    gchar* taskname = g_strndup (title, next-title);
+
+    next += sizeof(endtitle)/sizeof(endtitle[0]) - 1;
+
+    dsc_len -= (next - dataptr);
+
+    dataptr = next;
+
+    create_task (Card->description, &end, taskname, active);
+    g_free(taskname);
+  }
+
+  //gtk_text_buffer_set_text (buf, description, strlen(description));
+}
+
+static void
+insert_checkbox(GtkButton* btn, gpointer data)
+{
+  GtkTextView* text_view = GTK_TEXT_VIEW (data);
+  GtkTextBuffer* buffer = gtk_text_view_get_buffer(text_view);
+  GtkTextIter iter = {};
+  gtk_text_buffer_insert_at_cursor (buffer, "\n", 1);
+  gtk_text_buffer_get_iter_at_mark (buffer, &iter, gtk_text_buffer_get_mark (buffer, "insert"));
+  create_task(text_view, &iter, "Task #", false);
+}
 
 void
 kanban_card_set_css_provider(KanbanCard* card, GtkStyleProvider* CssProvider)
@@ -91,23 +295,12 @@ delete_clicked(GtkButton* btn, gpointer user_data)
 
   kanban_column_remove_card (old_col, user_data);
 }
+
 static void
 reveal_clicked(GtkButton* btn, gpointer user_data)
 {
   KanbanCard* card = (KanbanCard*)user_data;
-
-  bool revealed = gtk_revealer_get_reveal_child (card->revealercard);
-  if (revealed){
-    adw_button_content_set_icon_name (card->BtnContent, "go-down-symbolic");
-    gtk_widget_set_can_target (GTK_WIDGET(card->LblCardName), false);
-    gtk_widget_set_can_focus (GTK_WIDGET(card->LblCardName), false);
-  }
-  else{
-    adw_button_content_set_icon_name (card->BtnContent, "go-up-symbolic");
-    gtk_widget_set_can_target (GTK_WIDGET(card->LblCardName), true);
-    gtk_widget_set_can_focus (GTK_WIDGET(card->LblCardName), true);
-  }
-  gtk_revealer_set_reveal_child (card->revealercard,!revealed);
+  kanban_card_set_reveal (card, !kanban_card_get_reveal (card));
 }
 static void
 kanban_card_class_init (KanbanCardClass *klass)
@@ -115,12 +308,14 @@ kanban_card_class_init (KanbanCardClass *klass)
 GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/zhrexl/kanban/kanban-card.ui");
+  gtk_widget_class_bind_template_child (widget_class, KanbanCard, handlerDrag);
   gtk_widget_class_bind_template_child (widget_class, KanbanCard, LblCardName);
   gtk_widget_class_bind_template_child (widget_class, KanbanCard, revealercard);
   gtk_widget_class_bind_template_child (widget_class, KanbanCard, description);
   gtk_widget_class_bind_template_child (widget_class, KanbanCard, BtnContent);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), reveal_clicked);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), delete_clicked);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), insert_checkbox);
 }
 static GdkContentProvider *
 css_drag_prepare (GtkDragSource *source,
@@ -144,6 +339,6 @@ kanban_card_init (KanbanCard *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
   source = gtk_drag_source_new ();
-  gtk_widget_add_controller (GTK_WIDGET (self), GTK_EVENT_CONTROLLER (source));
+  gtk_widget_add_controller (GTK_WIDGET (self->handlerDrag), GTK_EVENT_CONTROLLER (source));
   g_signal_connect (source, "prepare", G_CALLBACK (css_drag_prepare), self);
 }

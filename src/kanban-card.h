@@ -39,7 +39,13 @@ kanban_card_set_css_provider(KanbanCard* card, GtkStyleProvider* CssProvider);
 const gchar*
 kanban_card_get_title(KanbanCard* Card);
 
-gchar*
+void
+kanban_card_set_reveal(KanbanCard* card, gboolean revealed);
+
+gboolean
+kanban_card_get_reveal(KanbanCard* Card);
+
+GBytes*
 kanban_card_get_description(KanbanCard* Card);
 
 void

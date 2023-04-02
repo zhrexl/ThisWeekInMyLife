@@ -73,12 +73,15 @@ void kanban_column_get_json(KanbanColumn* Column, gpointer CardObject)
       nested = json_object_new ();
 
       item = elem->data;
-      gchar* description = kanban_card_get_description (item);
+      GBytes* byteDescription = kanban_card_get_description (item);
+      gsize size = 0;
+      const gchar* description = g_bytes_get_data (byteDescription, &size);
 
       json_object_set_string_member (nested, "description", description);
+      json_object_set_int_member (nested, "revealed", kanban_card_get_reveal (item));
       json_object_set_object_member (object, kanban_card_get_title (item), nested);
 
-      g_free(description);
+      g_bytes_unref (byteDescription);
     }
   }
 
@@ -105,12 +108,13 @@ kanban_column_remove_card(KanbanColumn* Column, gpointer card)
 }
 
 void
-kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar* description)
+kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar* description, gboolean revealed)
 {
   KanbanCard*   card   = kanban_card_new();
 
   kanban_card_set_title (card, title);
   kanban_card_set_description (card, description);
+  kanban_card_set_reveal (card, revealed);
   gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card)), Column->provider, G_MAXUINT);
   kanban_card_set_css_provider(card, Column->provider);
   add_card(Column,card);
