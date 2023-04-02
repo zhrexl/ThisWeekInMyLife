@@ -1,4 +1,4 @@
-application_id = 'com.github.zhrexl.kanban'
+application_id = 'com.github.zhrexl.ThisWeekInMyLife'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(

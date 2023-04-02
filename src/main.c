@@ -34,7 +34,7 @@ main (int   argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	app = kanban_application_new ("com.github.zhrexl.kanban", 0);
+	app = kanban_application_new ("com.github.zhrexl.thisweekinmylife", 0);
 	ret = g_application_run (G_APPLICATION (app), argc, argv);
 
 	return ret;

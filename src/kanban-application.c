@@ -99,10 +99,28 @@ kanban_application_quit_action (GSimpleAction *action,
 
 	g_assert (KANBAN_IS_APPLICATION (self));
 
+        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
+        g_print("oiii");
+        save_cards (Window);
+
 	g_application_quit (G_APPLICATION (self));
+}
+static void
+kanban_application_save_action (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	KanbanApplication *self = user_data;
+
+	g_assert (KANBAN_IS_APPLICATION (self));
+
+        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
+
+        save_cards (Window);
 }
 
 static const GActionEntry app_actions[] = {
+        { "save", kanban_application_save_action },
 	{ "quit", kanban_application_quit_action },
 	{ "about", kanban_application_about_action },
 };
@@ -117,4 +135,7 @@ kanban_application_init (KanbanApplication *self)
 	gtk_application_set_accels_for_action (GTK_APPLICATION (self),
 	                                       "app.quit",
 	                                       (const char *[]) { "<primary>q", NULL });
+        gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+	                                       "app.save",
+	                                       (const char *[]) { "<primary>s", NULL });
 }

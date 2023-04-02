@@ -16,6 +16,7 @@
             </style>
             <child type="start">
               <object class="GtkButton">
+                <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
                 <property name="icon-name">document-save-symbolic</property>
               </object>
             </child>

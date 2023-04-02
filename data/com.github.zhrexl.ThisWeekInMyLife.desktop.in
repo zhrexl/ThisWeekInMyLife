@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ThisWeekInMyLife
+Exec=ThisWeekInMyLife
+Icon=com.github.zhrexl.ThisWeekInMyLife
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true

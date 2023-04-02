@@ -49,7 +49,7 @@ apply_css (GtkWidget *widget, GtkStyleProvider *provider)
     apply_css (child, provider);
 }
 
-static gboolean
+gboolean
 save_cards(gpointer user_data)
 {
   JsonGenerator *generator;
@@ -98,6 +98,11 @@ save_cards(gpointer user_data)
 
   return TRUE;
 }
+static void
+save_before_quit(KanbanWindow* self)
+{
+  save_cards (self);
+}
 
 static void
 kanban_window_class_init (KanbanWindowClass *klass)
@@ -107,6 +112,7 @@ GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/zhrexl/kanban/kanban-window.ui");
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, header_bar);
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, mainBox);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), save_before_quit);
 }
 static gboolean
 item_drag_drop (GtkDropTarget *dest,
@@ -241,12 +247,13 @@ load_ui(KanbanWindow* self)
 
   apply_css (GTK_WIDGET(self), self->provider);
 
-  g_timeout_add (1000, (GSourceFunc)save_cards, self);
+  //g_timeout_add (1000, (GSourceFunc)save_cards, self);
 
   g_free(file_path);
 
   return FALSE;
 }
+
 static void
 kanban_window_init (KanbanWindow *self)
 {
@@ -259,4 +266,7 @@ kanban_window_init (KanbanWindow *self)
                                        "/com/github/zhrexl/kanban/stylesheet.css");
 
   g_idle_add ((GSourceFunc)load_ui, self);
+
+  g_signal_connect(self, "destroy", G_CALLBACK(save_before_quit), NULL);
+
 }

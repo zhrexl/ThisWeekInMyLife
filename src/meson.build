@@ -12,12 +12,12 @@ kanban_deps = [
   dependency('libadwaita-1', version: '>= 1.1'),
 ]
 
-kanban_sources += gnome.compile_resources('kanban-resources',
-  'kanban.gresource.xml',
-  c_name: 'kanban'
+kanban_sources += gnome.compile_resources('ThisWeekInMyLife-resources',
+  'ThisWeekInMyLife.gresource.xml',
+  c_name: 'ThisWeekInMyLife'
 )
 
-executable('kanban', kanban_sources,
+executable('ThisWeekInMyLife', kanban_sources,
   dependencies: kanban_deps,
        install: true,
 )

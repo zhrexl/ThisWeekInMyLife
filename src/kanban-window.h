@@ -26,6 +26,9 @@ G_BEGIN_DECLS
 
 #define KANBAN_TYPE_WINDOW (kanban_window_get_type())
 
+gboolean
+save_cards(gpointer user_data);
+
 G_DECLARE_FINAL_TYPE (KanbanWindow, kanban_window, KANBAN, WINDOW, AdwApplicationWindow)
 
 G_END_DECLS

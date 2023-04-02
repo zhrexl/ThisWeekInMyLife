@@ -1,9 +1,9 @@
 {
-    "app-id" : "com.github.zhrexl.kanban",
+    "app-id" : "com.github.zhrexl.thisweekinmylife",
     "runtime" : "org.gnome.Platform",
     "runtime-version" : "43",
     "sdk" : "org.gnome.Sdk",
-    "command" : "kanban",
+    "command" : "ThisWeekInMyLife",
     "finish-args" : [
         "--share=network",
         "--share=ipc",
@@ -24,7 +24,7 @@
     ],
     "modules" : [
         {
-            "name" : "kanban",
+            "name" : "ThisWeekInMyLife",
             "builddir" : true,
             "buildsystem" : "meson",
             "sources" : [
