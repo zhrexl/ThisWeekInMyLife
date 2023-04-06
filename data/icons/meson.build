@@ -1,4 +1,4 @@
-application_id = 'com.github.zhrexl.ThisWeekInMyLife'
+application_id = 'io.github.zhrexl.ThisWeekInMyLife'
 
 scalable_dir = join_paths('hicolor', 'scalable', 'apps')
 install_data(
