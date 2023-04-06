@@ -4,7 +4,8 @@ This project is currently a MVP!!!!!
 Not even alpha version!
 Please, be careful.
 
-![image](https://user-images.githubusercontent.com/51864789/228970960-e639280d-68b0-4788-af97-ebb8ac727d44.png)
+![image](https://user-images.githubusercontent.com/51864789/230498421-a357b45f-58fc-43d7-82eb-43667249cc6f.png)
+![image](https://user-images.githubusercontent.com/51864789/230498672-65592ba4-8be0-4055-93d3-537a99498a35.png)
 
 
 
