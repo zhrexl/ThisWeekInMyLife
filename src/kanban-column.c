@@ -23,15 +23,18 @@
 #include "kanban-card.h"
 #include <json-glib/json-glib.h>
 
+static GParamSpec *needs_saving = NULL;
+
 struct _KanbanColumn
 {
   GtkBox parent_instance;
 
-  GtkEditableLabel* title;
-  GtkListBox* CardsBox;
+  GtkEditableLabel  *title;
+  GtkListBox        *CardsBox;
+  GtkStyleProvider  *provider;
+  GList             *Cards;
 
-  GtkStyleProvider* provider;
-  GList*         Cards;
+  gboolean needs_saving;
 };
 
 G_DEFINE_FINAL_TYPE (KanbanColumn, kanban_column, GTK_TYPE_BOX)
@@ -95,11 +98,13 @@ add_card(KanbanColumn* Column, KanbanCard* card)
   gtk_list_box_append(Column->CardsBox, GTK_WIDGET(card));
   Column->Cards = g_list_append (Column->Cards, card);
 }
+
 void
 kanban_column_add_card(KanbanColumn* Column, gpointer card)
 {
   add_card(Column, KANBAN_CARD (card));
 }
+
 void
 kanban_column_remove_card(KanbanColumn* Column, gpointer card)
 {
@@ -118,6 +123,11 @@ kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar
   gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card)), Column->provider, G_MAXUINT);
   kanban_card_set_css_provider(card, Column->provider);
   add_card(Column,card);
+  
+  g_object_bind_property (Column, "needs-saving", card, "needs-saving", G_BINDING_BIDIRECTIONAL);
+
+//  g_signal_connect (Column, "notify::needs-saving", 
+     //                                           G_CALLBACK(teste), Column);
 }
 
 static void
@@ -135,6 +145,30 @@ add_card_clicked(GtkButton* btn, gpointer data)
   kanban_card_set_css_provider(card, Column->provider);
   add_card(Column,card);
 }
+
+
+static void 
+kanban_get_property(GObject *object, guint property_id, GValue *value, GParamSpec *pspec) 
+{
+  KanbanColumn *self = KANBAN_COLUMN(object);
+
+  if (property_id == 1)
+    g_value_set_boolean (value, self->needs_saving);
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
+static void 
+kanban_set_property(GObject *object, guint property_id, const GValue *value, GParamSpec *pspec) 
+{
+  KanbanColumn *self = KANBAN_COLUMN(object);
+
+  if (property_id == 1)
+    self->needs_saving = g_value_get_boolean(value);
+  else
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+}
+
 static void
 kanban_column_class_init (KanbanColumnClass *klass)
 {
@@ -144,6 +178,13 @@ kanban_column_class_init (KanbanColumnClass *klass)
   gtk_widget_class_bind_template_child (widget_class, KanbanColumn, title);
   gtk_widget_class_bind_template_child (widget_class, KanbanColumn, CardsBox);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), add_card_clicked);
+
+  GObjectClass *GClass = G_OBJECT_CLASS(klass);
+  GClass->get_property = kanban_get_property;
+  GClass->set_property = kanban_set_property;
+
+  needs_saving = g_param_spec_boolean("needs-saving", "needsave", "Boolean value", 0, G_PARAM_READWRITE);
+  g_object_class_install_property (GClass, 1, needs_saving);
 }
 
 static void

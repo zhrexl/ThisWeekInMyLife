@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <requires lib="Adw" version="1.0"/>
+  <requires lib="Adw" version="1.2"/>
   <template class="KanbanWindow" parent="AdwApplicationWindow">
-    <property name="title">This Week in My Life</property>
+    <property name="title" translatable="yes">This Week in My Life</property>
     <property name="default-width">1200</property>
     <property name="default-height">700</property>
     <child>
+      <object class="AdwToastOverlay" id="toast_overlay">
+      <property name="child">
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <child>
@@ -15,11 +17,24 @@
               <class name="flat"/>
             </style>
             <child type="start">
+              <object class="GtkButton" id="save">
+                <signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Save</property>
+              </object>
+            </child>
+            <!--<child type="start">
+              <object class="GtkButton">
+                <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
+                <property name="icon-name">document-open-symbolic</property>
+              </object>
+            </child>
+            <child type="start">
               <object class="GtkButton">
                 <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
                 <property name="icon-name">document-save-symbolic</property>
               </object>
-            </child>
+            </child>-->
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
@@ -32,28 +47,30 @@
           <object class="GtkBox" id="mainBox">
           <property name="orientation">horizontal</property>
           <property name="homogeneous">true</property>
-          <property name="margin-start">10</property>
+          <property name="margin-start">5</property>
           <property name="spacing">5</property>
           <property name="margin-top">0</property>
-          <property name="margin-end">10</property>
-          <property name="margin-bottom">10</property>
+          <property name="margin-end">5</property>
+          <property name="margin-bottom">5</property>
           </object>
         </child>
       </object>
+      </property>
+    </object>
     </child>
   </template>
   <menu id="primary_menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">_Save</attribute>
+        <attribute name="action">app.save</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">_Preferences</attribute>
-        <attribute name="action">app.preferences</attribute>
+        <attribute name="action">win.show-preferences</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
-        <attribute name="action">win.show-help-overlay</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">_About Kanban</attribute>
+        <attribute name="label" translatable="yes">_About</attribute>
         <attribute name="action">app.about</attribute>
       </item>
     </section>

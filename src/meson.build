@@ -9,7 +9,7 @@ kanban_sources = [
 kanban_deps = [
   dependency('gtk4'),
   dependency('json-glib-1.0', version: '>= 1.0'),
-  dependency('libadwaita-1', version: '>= 1.1'),
+  dependency('libadwaita-1', version: '>= 1.2'),
 ]
 
 kanban_sources += gnome.compile_resources('ThisWeekInMyLife-resources',

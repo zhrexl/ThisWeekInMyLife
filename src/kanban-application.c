@@ -72,7 +72,7 @@ kanban_application_about_action (GSimpleAction *action,
                                  GVariant      *parameter,
                                  gpointer       user_data)
 {
-	static const char *developers[] = {"zhrexl", NULL};
+	static const char *developers[] = {"zhrexl https://github.com/zhrexl/", NULL};
 	KanbanApplication *self = user_data;
 	GtkWindow *window = NULL;
 
@@ -80,14 +80,14 @@ kanban_application_about_action (GSimpleAction *action,
 
 	window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
-	/*adw_show_about_window (window,
-	                       "application-name", "kanban",
-	                       "application-icon", "com.github.zhrexl.kanban",
+	adw_show_about_window (window,
+	                       "application-name", "This Week in My Life",
+	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
 	                       "developer-name", "zhrexl",
-	                       "version", "0.1.0",
+	                       "version", "0.0.1",
 	                       "developers", developers,
 	                       "copyright", "© 2023 zhrexl",
-	                       NULL);*/
+	                       NULL);
 }
 
 static void
@@ -98,10 +98,6 @@ kanban_application_quit_action (GSimpleAction *action,
 	KanbanApplication *self = user_data;
 
 	g_assert (KANBAN_IS_APPLICATION (self));
-
-        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
-        g_print("oiii");
-        save_cards (Window);
 
 	g_application_quit (G_APPLICATION (self));
 }

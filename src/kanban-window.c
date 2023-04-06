@@ -24,15 +24,19 @@
 #include "kanban-column.h"
 #include "json-glib/json-glib.h"
 
+const gchar FileName[] = ".thisweekinmylife\0";
+
 struct _KanbanWindow
 {
     AdwApplicationWindow  parent_instance;
 
+    AdwToastOverlay* toast_overlay;
+
     /* Template widgets */
     GtkHeaderBar        *header_bar;
     GtkBox              *mainBox;
-    GList*              ListOfColumns;
-
+    GtkButton           *save;
+    GList               *ListOfColumns;
     GtkStyleProvider    *provider;
 };
 
@@ -79,40 +83,80 @@ save_cards(gpointer user_data)
 
   //g_print("checking nested object %s",data);
   const gchar* home_dir = g_get_home_dir ();
+
   // TODO: file_path should be a global file
-  gchar* file_path = g_strdup_printf ("%s/.thisweekinmylife", home_dir);
+  gchar* file_path = g_strdup_printf ("%s/%s", home_dir, FileName);
 
   GError* error = NULL;
   g_file_set_contents (file_path, data, -1, &error);
   if (error != NULL) {
-    g_printerr ("Error saving file: %s\n", error->message);
+    gchar* msg = g_strdup_printf ("Error saving file: %s\n", error->message);
+    g_printerr ("%s", msg);
+    adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new (msg));
+    g_free(msg);
     g_error_free (error);
     return 1;
   }
 
+  adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new ("Saved"));
+
+  gtk_widget_set_sensitive (GTK_WIDGET (wnd->save), false);
   g_free(file_path);
   g_free (data);
-  //g_free(home_dir);
+
   json_node_free (root);
   g_object_unref (generator);
 
   return TRUE;
 }
 static void
+response (
+  AdwMessageDialog* self,
+  gchar* response,
+  gpointer user_data
+)
+{
+  if (strstr(response, "cancel"))
+    return;
+
+  if (strstr (response, "save"))
+    save_cards (user_data);
+
+  gtk_window_destroy (GTK_WINDOW (user_data));
+}
+static gboolean
 save_before_quit(KanbanWindow* self)
 {
-  save_cards (self);
-}
+  gboolean sensitive = gtk_widget_get_sensitive(GTK_WIDGET(self->save));
 
-static void
-kanban_window_class_init (KanbanWindowClass *klass)
-{
-GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+  if(!sensitive)
+    return false;
 
-  gtk_widget_class_set_template_from_resource (widget_class, "/com/github/zhrexl/kanban/kanban-window.ui");
-  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, header_bar);
-  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, mainBox);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), save_before_quit);
+  GtkWidget *dialog;
+
+  dialog = adw_message_dialog_new (GTK_WINDOW(self), ("Save Changes?"), NULL);
+
+  adw_message_dialog_format_body (ADW_MESSAGE_DIALOG (dialog),
+                                ("Open document contains unsaved changes. Changes which are not saved will be permanently lost."));
+
+  adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG (dialog),
+                                  "cancel",  ("_Cancel"),
+                                  "discard",  ("_Discard"),
+                                  "save", ("_Save & Quit"),
+                                  NULL);
+
+  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "discard", ADW_RESPONSE_DESTRUCTIVE);
+  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "save", ADW_RESPONSE_SUGGESTED);
+
+  adw_message_dialog_set_default_response (ADW_MESSAGE_DIALOG (dialog), "cancel");
+  adw_message_dialog_set_close_response (ADW_MESSAGE_DIALOG (dialog), "cancel");
+
+  g_signal_connect (dialog, "response", G_CALLBACK (response), self);
+
+  gtk_window_present (GTK_WINDOW (dialog));
+
+  return TRUE;
+  //save_cards (self);
 }
 static gboolean
 item_drag_drop (GtkDropTarget *dest,
@@ -132,7 +176,6 @@ item_drag_drop (GtkDropTarget *dest,
   GtkWidget* old_scrollWnd  = gtk_widget_get_parent(old_view);
   KanbanColumn* old_col     = KANBAN_COLUMN (gtk_widget_get_parent (old_scrollWnd));
 
-
   kanban_column_remove_card (old_col, card);
 
   KanbanColumn* col = KANBAN_COLUMN (gtk_event_controller_get_widget (
@@ -142,6 +185,42 @@ item_drag_drop (GtkDropTarget *dest,
 
   return TRUE;
 }
+
+static KanbanColumn*
+create_column(KanbanWindow* Window, const gchar* title, GtkStyleProvider *provider)
+{
+  KanbanColumn*   column      = kanban_column_new ();
+  GtkDropTarget*  target      = gtk_drop_target_new (G_TYPE_POINTER,
+                                                       GDK_ACTION_COPY);
+
+  kanban_column_set_title (column, title);
+  kanban_column_set_provider(column, provider);
+
+  g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
+  g_object_bind_property (column, "needs-saving", Window->save, "sensitive", G_BINDING_BIDIRECTIONAL);
+  g_object_set(column, "needs-saving", 0, NULL);
+
+  gtk_widget_add_controller (GTK_WIDGET (column),
+                               GTK_EVENT_CONTROLLER (target));
+
+  return column;
+}
+
+static void
+kanban_window_class_init (KanbanWindowClass *klass)
+{
+GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  gtk_widget_class_set_template_from_resource (widget_class, "/com/github/zhrexl/kanban/kanban-window.ui");
+  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, header_bar);
+  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, mainBox);
+  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, save);
+  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, toast_overlay);
+
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), save_cards);
+}
+
+
 static
 void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 {
@@ -163,6 +242,8 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 
   g_list_free(list);
 }
+
+
 static
 int loadjson (KanbanWindow* self, gchar* file_path)
 {
@@ -171,8 +252,8 @@ int loadjson (KanbanWindow* self, gchar* file_path)
 
   if(!g_file_test (file_path, G_FILE_TEST_EXISTS))
   {
-      g_print("No Json was found! Creating a new one...\n");
-      return 1;
+    g_print("No Json was found! Creating a new one...\n");
+    return 1;
   }
   if (!json_parser_load_from_file(parser, file_path, &error)) {
     g_printerr ("Error parsing JSON: %s\n", error->message);
@@ -187,6 +268,7 @@ int loadjson (KanbanWindow* self, gchar* file_path)
     g_object_unref (parser);
     return 1;
   }
+
   JsonObject* object = json_node_get_object (root);
 
   GList* objects = json_object_get_members (object);
@@ -197,27 +279,21 @@ int loadjson (KanbanWindow* self, gchar* file_path)
   for (GList* child = objects; child != NULL; child = child->next)
   {
     const char*     object_name = child->data;
-    KanbanColumn*   column      = kanban_column_new ();
-    GtkDropTarget*  target      = gtk_drop_target_new (G_TYPE_POINTER,
-                                                       GDK_ACTION_COPY);
+    KanbanColumn*   column      = create_column (self, object_name, self->provider);
 
-    g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
-
-    kanban_column_set_title (column, object_name);
-    kanban_column_set_provider(column, self->provider);
     gtk_box_append (self->mainBox, GTK_WIDGET (column));
-    gtk_widget_add_controller (GTK_WIDGET (column),
-                               GTK_EVENT_CONTROLLER (target));
 
     self->ListOfColumns = g_list_append (self->ListOfColumns, column);
 
     JsonNode* node = json_object_get_member (object, object_name);
     create_cards_from_json (column, node);
   }
+
   g_list_free (objects);
   g_object_unref (parser);
   return 0;
 }
+
 static gboolean
 load_ui(KanbanWindow* self)
 {
@@ -225,29 +301,22 @@ load_ui(KanbanWindow* self)
 
   /* Restore json */
   const gchar* home_dir = g_get_home_dir ();
-  gchar* file_path      = g_strdup_printf ("%s/.thisweekinmylife",
-                                           home_dir);
+  gchar* file_path      = g_strdup_printf ("%s/%s",
+                                           home_dir, FileName);
 
   if (loadjson (self, file_path))
   {
     for (int i = 0; i < 5; i++)
     {
-      KanbanColumn* column  = kanban_column_new ();
-      GtkDropTarget* target = gtk_drop_target_new (G_TYPE_POINTER, GDK_ACTION_COPY);
-      g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
+      KanbanColumn* column  = create_column(self, Weekdays[i], self->provider);
 
-      kanban_column_set_title (column, Weekdays[i]);
-      kanban_column_set_provider(column, self->provider);
       gtk_box_append (self->mainBox, GTK_WIDGET (column));
-      gtk_widget_add_controller (GTK_WIDGET (column), GTK_EVENT_CONTROLLER (target));
 
       self->ListOfColumns = g_list_append (self->ListOfColumns, column);
     }
   }
 
   apply_css (GTK_WIDGET(self), self->provider);
-
-  //g_timeout_add (1000, (GSourceFunc)save_cards, self);
 
   g_free(file_path);
 
@@ -267,6 +336,6 @@ kanban_window_init (KanbanWindow *self)
 
   g_idle_add ((GSourceFunc)load_ui, self);
 
-  g_signal_connect(self, "destroy", G_CALLBACK(save_before_quit), NULL);
+  g_signal_connect(self, "close-request", G_CALLBACK(save_before_quit), NULL);
 
 }
