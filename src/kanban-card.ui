@@ -9,6 +9,7 @@
     <style>
       <class name="card"/>
       <class name="kanbancard"/>
+      <class name="colorbl"/>
     </style>
     <child>
       <object class="GtkBox">
@@ -85,6 +86,7 @@
                     <property name="wrap-mode">GTK_WRAP_WORD_CHAR</property>
                     <style>
                       <class name="noback"/>
+                      <class name="colorbl"/>
                     </style>
                   </object>
                 </child>

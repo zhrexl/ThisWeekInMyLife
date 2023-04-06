@@ -37,21 +37,10 @@ struct _KanbanWindow
     GtkBox              *mainBox;
     GtkButton           *save;
     GList               *ListOfColumns;
-    GtkStyleProvider    *provider;
 };
 
 G_DEFINE_FINAL_TYPE (KanbanWindow, kanban_window, ADW_TYPE_APPLICATION_WINDOW)
 
-static void
-apply_css (GtkWidget *widget, GtkStyleProvider *provider)
-{
-  GtkWidget *child;
-  gtk_style_context_add_provider (gtk_widget_get_style_context (widget), provider, G_MAXUINT);
-  for (child = gtk_widget_get_first_child (widget);
-       child != NULL;
-       child = gtk_widget_get_next_sibling (child))
-    apply_css (child, provider);
-}
 
 gboolean
 save_cards(gpointer user_data)
@@ -187,14 +176,13 @@ item_drag_drop (GtkDropTarget *dest,
 }
 
 static KanbanColumn*
-create_column(KanbanWindow* Window, const gchar* title, GtkStyleProvider *provider)
+create_column(KanbanWindow* Window, const gchar* title)
 {
   KanbanColumn*   column      = kanban_column_new ();
   GtkDropTarget*  target      = gtk_drop_target_new (G_TYPE_POINTER,
                                                        GDK_ACTION_COPY);
 
   kanban_column_set_title (column, title);
-  kanban_column_set_provider(column, provider);
 
   g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
   g_object_bind_property (column, "needs-saving", Window->save, "sensitive", G_BINDING_BIDIRECTIONAL);
@@ -279,7 +267,7 @@ int loadjson (KanbanWindow* self, gchar* file_path)
   for (GList* child = objects; child != NULL; child = child->next)
   {
     const char*     object_name = child->data;
-    KanbanColumn*   column      = create_column (self, object_name, self->provider);
+    KanbanColumn*   column      = create_column (self, object_name);
 
     gtk_box_append (self->mainBox, GTK_WIDGET (column));
 
@@ -308,15 +296,13 @@ load_ui(KanbanWindow* self)
   {
     for (int i = 0; i < 5; i++)
     {
-      KanbanColumn* column  = create_column(self, Weekdays[i], self->provider);
+      KanbanColumn* column  = create_column(self, Weekdays[i]);
 
       gtk_box_append (self->mainBox, GTK_WIDGET (column));
 
       self->ListOfColumns = g_list_append (self->ListOfColumns, column);
     }
   }
-
-  apply_css (GTK_WIDGET(self), self->provider);
 
   g_free(file_path);
 
@@ -328,11 +314,6 @@ kanban_window_init (KanbanWindow *self)
 {
 
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  /* Load CSS */
-  self->provider = GTK_STYLE_PROVIDER (gtk_css_provider_new ());
-  gtk_css_provider_load_from_resource (GTK_CSS_PROVIDER (self->provider),
-                                       "/com/github/zhrexl/kanban/stylesheet.css");
 
   g_idle_add ((GSourceFunc)load_ui, self);
 

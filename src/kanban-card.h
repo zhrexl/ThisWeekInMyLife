@@ -33,9 +33,6 @@ KanbanCard *kanban_card_new(void);
 void
 kanban_card_set_title(KanbanCard* Card, const char *title);
 
-void
-kanban_card_set_css_provider(KanbanCard* card, GtkStyleProvider* CssProvider);
-
 const gchar*
 kanban_card_get_title(KanbanCard* Card);
 

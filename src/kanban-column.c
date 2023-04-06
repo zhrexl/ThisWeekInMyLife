@@ -31,7 +31,6 @@ struct _KanbanColumn
 
   GtkEditableLabel  *title;
   GtkListBox        *CardsBox;
-  GtkStyleProvider  *provider;
   GList             *Cards;
 
   gboolean needs_saving;
@@ -52,11 +51,6 @@ kanban_column_set_title(KanbanColumn* Column, const char *title)
   gtk_editable_set_text (GTK_EDITABLE (Column->title), title);
 }
 
-void
-kanban_column_set_provider(KanbanColumn* Column, GtkStyleProvider* provider)
-{
-  Column->provider = provider;
-}
 
 GtkListBox*
 kanban_column_get_cards_box(KanbanColumn* Column)
@@ -120,8 +114,7 @@ kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar
   kanban_card_set_title (card, title);
   kanban_card_set_description (card, description);
   kanban_card_set_reveal (card, revealed);
-  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card)), Column->provider, G_MAXUINT);
-  kanban_card_set_css_provider(card, Column->provider);
+
   add_card(Column,card);
   
   g_object_bind_property (Column, "needs-saving", card, "needs-saving", G_BINDING_BIDIRECTIONAL);
@@ -141,8 +134,6 @@ add_card_clicked(GtkButton* btn, gpointer data)
   kanban_card_set_title (card, title);
   g_free(title);
 
-  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card)), Column->provider, G_MAXUINT);
-  kanban_card_set_css_provider(card, Column->provider);
   add_card(Column,card);
 }
 

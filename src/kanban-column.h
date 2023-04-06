@@ -34,9 +34,6 @@ KanbanColumn
 void
 kanban_column_set_title(KanbanColumn* Card, const char *title);
 
-void
-kanban_column_set_provider(KanbanColumn* Column, GtkStyleProvider* provider);
-
 GtkListBox*
 kanban_column_get_cards_box(KanbanColumn* Column);
 

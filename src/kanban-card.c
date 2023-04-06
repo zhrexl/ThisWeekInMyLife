@@ -292,12 +292,7 @@ insert_checkbox(GtkButton* btn, gpointer data)
   create_task(text_view, &iter, "Task #", false);
 }
 
-void
-kanban_card_set_css_provider(KanbanCard* card, GtkStyleProvider* CssProvider)
-{
-  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card->description)), CssProvider, G_MAXUINT);
-  gtk_style_context_add_provider (gtk_widget_get_style_context (GTK_WIDGET (card->LblCardName)), CssProvider, G_MAXUINT);
-}
+
 
 static void
 delete_clicked(GtkButton* btn, gpointer user_data)

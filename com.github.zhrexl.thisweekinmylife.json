@@ -1,7 +1,7 @@
 {
     "app-id" : "com.github.zhrexl.thisweekinmylife",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "43",
+    "runtime-version" : "44",
     "sdk" : "org.gnome.Sdk",
     "command" : "ThisWeekInMyLife",
     "finish-args" : [
@@ -9,7 +9,8 @@
         "--share=ipc",
         "--socket=fallback-x11",
         "--device=dri",
-        "--socket=wayland"
+        "--socket=wayland",
+        "--filesystem=home"
     ],
     "cleanup" : [
         "/include",
@@ -30,7 +31,9 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : ""
+                    "url" : "https://github.com/zhrexl/ThisWeekInMyLife.git",
+                    "branch": "main",
+                    "commit": ""
                 }
             ]
         }

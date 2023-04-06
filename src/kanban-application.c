@@ -56,6 +56,16 @@ kanban_application_activate (GApplication *app)
 		                       "application", app,
 		                       NULL);
 
+        GtkCssProvider* provider = gtk_css_provider_new ();
+        gtk_css_provider_load_from_resource (provider,
+                                       "/com/github/zhrexl/kanban/stylesheet.css");
+
+        GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (window));
+        gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+        g_object_unref (provider);
+
+
 	gtk_window_present (window);
 }
 
