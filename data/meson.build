@@ -12,21 +12,15 @@ if desktop_utils.found()
   test('Validate desktop file', desktop_utils, args: [desktop_file])
 endif
 
-appstream_file = i18n.merge_file(
-        input: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml.in',
-       output: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml',
-       po_dir: '../po',
-      install: true,
-  install_dir: join_paths(get_option('datadir'), 'appdata')
+
+metainfo = i18n.merge_file(
+  input: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml.in',
+  output: 'io.github.zhrexl.ThisWeekInMyLife.metainfo.xml',
+  install: true,
+  install_dir: join_paths(join_paths('share'), 'metainfo'),
+  po_dir: join_paths(meson.project_source_root(), 'po')
 )
 
-metainfo_file = i18n.merge_file(
-        input: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml',
-       output: 'io.github.zhrexl.ThisWeekInMyLife.metainfo.xml',
-       po_dir: '../po',
-      install: true,
-  install_dir: join_paths(get_option('datadir'), 'metainfo')
-)
 
 appstream_util = find_program('appstream-util', required: false)
 if appstream_util.found()
