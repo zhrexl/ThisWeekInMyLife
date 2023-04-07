@@ -15,9 +15,9 @@ endif
 
 metainfo = i18n.merge_file(
   input: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml.in',
-  output: 'io.github.zhrexl.ThisWeekInMyLife.metainfo.xml',
+  output: 'io.github.zhrexl.ThisWeekInMyLife.appdata.xml',
   install: true,
-  install_dir: join_paths(join_paths('share'), 'metainfo'),
+  install_dir: join_paths(join_paths('share'), 'appdata'),
   po_dir: join_paths(meson.project_source_root(), 'po')
 )
 
