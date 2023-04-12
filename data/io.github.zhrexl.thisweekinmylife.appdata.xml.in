@@ -25,7 +25,7 @@
     </p>
   </description>
   
-  <launchable type="desktop-id">io.github.zhrexl.ThisWeekInMyLife.desktop</launchable>
+  <launchable type="desktop-id">io.github.zhrexl.thisweekinmylife.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://user-images.githubusercontent.com/51864789/230498421-a357b45f-58fc-43d7-82eb-43667249cc6f.png</image>

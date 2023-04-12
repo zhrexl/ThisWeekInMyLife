@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=ThisWeekInMyLife
-Exec=ThisWeekInMyLife
-Icon=io.github.zhrexl.ThisWeekInMyLife
+Exec=thisweekinmylife
+Icon=io.github.zhrexl.thisweekinmylife
 Terminal=false
 Type=Application
 Categories=GTK;
