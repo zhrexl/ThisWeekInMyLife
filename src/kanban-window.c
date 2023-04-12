@@ -99,11 +99,7 @@ save_cards(gpointer user_data)
   return TRUE;
 }
 static void
-response (
-  AdwMessageDialog* self,
-  gchar* response,
-  gpointer user_data
-)
+response (AdwMessageDialog* self, gchar* response, gpointer user_data)
 {
   if (strstr(response, "cancel"))
     return;
