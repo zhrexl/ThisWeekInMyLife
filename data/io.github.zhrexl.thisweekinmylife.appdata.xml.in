@@ -7,6 +7,11 @@
   
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>AGPL-3.0-or-later</project_license>
+  <content_rating type="oars-1.1" />
+  
+  <url type="homepage">https://github.com/zhrexl/ThisWeekInMyLife</url>
+  <url type="bugtracker">https://github.com/zhrexl/ThisWeekInMyLife/issues</url>
+  <url type="donation">https://www.buymeacoffee.com/zhrexl</url>
   
   <supports>
     <control>pointing</control>
@@ -29,4 +34,11 @@
       <image>https://user-images.githubusercontent.com/51864789/230498672-65592ba4-8be0-4055-93d3-537a99498a35.png</image>
     </screenshot>
   </screenshots>
+  
+  <release version="0.0.1" date="2023-04-05">
+      <description>
+        <p>First release of ThisWeekInMyLife</p>
+      </description>
+    </release>
+  </releases>
 </component>
