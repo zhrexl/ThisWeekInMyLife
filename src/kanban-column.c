@@ -134,6 +134,7 @@ add_card_clicked(GtkButton* btn, gpointer data)
   kanban_card_set_title (card, title);
   g_free(title);
 
+  g_object_bind_property (Column, "needs-saving", card, "needs-saving", G_BINDING_BIDIRECTIONAL);
   add_card(Column,card);
 }
 
