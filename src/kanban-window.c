@@ -68,7 +68,7 @@ save_cards(gpointer user_data)
   json_node_take_object (root, CardObject);
   json_generator_set_root (generator, root);
 
-  g_object_set (generator, "pretty", true, NULL);
+  g_object_set (generator, "pretty", FALSE, NULL);
   data = json_generator_to_data (generator, &len);
 
   //g_print("checking nested object %s",data);

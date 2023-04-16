@@ -94,7 +94,7 @@ kanban_application_about_action (GSimpleAction *action,
 	                       "application-name", "This Week in My Life",
 	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
 	                       "developer-name", "zhrexl",
-	                       "version", "0.0.2S",
+	                       "version", "0.0.2",
 	                       "developers", developers,
 	                       "copyright", "© 2023 zhrexl",
 	                       NULL);
