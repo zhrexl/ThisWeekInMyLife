@@ -36,6 +36,7 @@ struct _KanbanWindow
     GtkHeaderBar        *header_bar;
     GtkBox              *mainBox;
     GtkButton           *save;
+    GtkToggleButton       *EditBtn;
     GList               *ListOfColumns;
 };
 
@@ -67,7 +68,7 @@ save_cards(gpointer user_data)
   json_node_take_object (root, CardObject);
   json_generator_set_root (generator, root);
 
-  g_object_set (generator, "pretty", false, NULL);
+  g_object_set (generator, "pretty", true, NULL);
   data = json_generator_to_data (generator, &len);
 
   //g_print("checking nested object %s",data);
@@ -98,6 +99,8 @@ save_cards(gpointer user_data)
 
   return TRUE;
 }
+
+
 static void
 response (AdwMessageDialog* self, gchar* response, gpointer user_data)
 {
@@ -109,6 +112,9 @@ response (AdwMessageDialog* self, gchar* response, gpointer user_data)
 
   gtk_window_destroy (GTK_WINDOW (user_data));
 }
+
+
+
 static gboolean
 save_before_quit(KanbanWindow* self)
 {
@@ -143,6 +149,9 @@ save_before_quit(KanbanWindow* self)
   return TRUE;
   //save_cards (self);
 }
+
+
+
 static gboolean
 item_drag_drop (GtkDropTarget *dest,
                 const GValue  *value,
@@ -171,7 +180,16 @@ item_drag_drop (GtkDropTarget *dest,
   return TRUE;
 }
 
-static KanbanColumn*
+static void
+remove_column(KanbanColumn* Column, gpointer user_data)
+{
+  KanbanWindow* Window = KANBAN_WINDOW (user_data);
+  Window->ListOfColumns = g_list_remove (Window->ListOfColumns, Column);
+  gtk_box_remove (Window->mainBox, GTK_WIDGET(Column));
+  gtk_widget_set_sensitive (GTK_WIDGET (Window->save), true);
+}
+
+GtkWidget*
 create_column(KanbanWindow* Window, const gchar* title)
 {
   KanbanColumn*   column      = kanban_column_new ();
@@ -181,13 +199,20 @@ create_column(KanbanWindow* Window, const gchar* title)
   kanban_column_set_title (column, title);
 
   g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
+  g_signal_connect (column, "delete-column", G_CALLBACK (remove_column), Window);
+
   g_object_bind_property (column, "needs-saving", Window->save, "sensitive", G_BINDING_BIDIRECTIONAL);
+  g_object_bind_property (column, "edit-mode", Window->EditBtn, "active", G_BINDING_BIDIRECTIONAL);
   g_object_set(column, "needs-saving", 0, NULL);
 
-  gtk_widget_add_controller (GTK_WIDGET (column),
-                               GTK_EVENT_CONTROLLER (target));
+  gtk_widget_add_controller ( GTK_WIDGET (column),
+                              GTK_EVENT_CONTROLLER (target));
 
-  return column;
+  gtk_box_append (Window->mainBox, GTK_WIDGET (column));
+
+  Window->ListOfColumns = g_list_append (Window->ListOfColumns, column);
+
+  return GTK_WIDGET(column);
 }
 
 static void
@@ -199,6 +224,7 @@ GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, header_bar);
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, mainBox);
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, save);
+  gtk_widget_class_bind_template_child (widget_class, KanbanWindow, EditBtn);
   gtk_widget_class_bind_template_child (widget_class, KanbanWindow, toast_overlay);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), save_cards);
@@ -263,11 +289,7 @@ int loadjson (KanbanWindow* self, gchar* file_path)
   for (GList* child = objects; child != NULL; child = child->next)
   {
     const char*     object_name = child->data;
-    KanbanColumn*   column      = create_column (self, object_name);
-
-    gtk_box_append (self->mainBox, GTK_WIDGET (column));
-
-    self->ListOfColumns = g_list_append (self->ListOfColumns, column);
+    KanbanColumn*   column      = KANBAN_COLUMN(create_column (self, object_name));
 
     JsonNode* node = json_object_get_member (object, object_name);
     create_cards_from_json (column, node);
@@ -292,11 +314,7 @@ load_ui(KanbanWindow* self)
   {
     for (int i = 0; i < 5; i++)
     {
-      KanbanColumn* column  = create_column(self, Weekdays[i]);
-
-      gtk_box_append (self->mainBox, GTK_WIDGET (column));
-
-      self->ListOfColumns = g_list_append (self->ListOfColumns, column);
+      create_column(self, Weekdays[i]);
     }
   }
 

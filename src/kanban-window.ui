@@ -23,6 +23,13 @@
                 <property name="tooltip-text" translatable="yes">Save</property>
               </object>
             </child>
+            <child type="start">
+              <object class="GtkToggleButton" id="EditBtn">
+                <!--<signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>-->
+                <property name="icon-name">editor-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Toggle Edit Columns Mode</property>
+              </object>
+            </child>
             <!--<child type="start">
               <object class="GtkButton">
                 <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
@@ -44,14 +51,18 @@
           </object>
         </child>
         <child>
-          <object class="GtkBox" id="mainBox">
-          <property name="orientation">horizontal</property>
-          <property name="homogeneous">true</property>
-          <property name="margin-start">5</property>
-          <property name="spacing">5</property>
-          <property name="margin-top">0</property>
-          <property name="margin-end">5</property>
-          <property name="margin-bottom">5</property>
+          <object class="GtkScrolledWindow">
+          <child>
+            <object class="GtkBox" id="mainBox">
+            <property name="orientation">horizontal</property>
+            <property name="homogeneous">true</property>
+            <property name="margin-start">5</property>
+            <property name="spacing">5</property>
+            <property name="margin-top">0</property>
+            <property name="margin-end">5</property>
+            <property name="margin-bottom">5</property>
+            </object>
+          </child>
           </object>
         </child>
       </object>
@@ -62,9 +73,15 @@
   <menu id="primary_menu">
     <section>
       <item>
+        <attribute name="label" translatable="yes">_New Column</attribute>
+        <attribute name="action">app.new</attribute>
+      </item>
+      <item>
         <attribute name="label" translatable="yes">_Save</attribute>
         <attribute name="action">app.save</attribute>
       </item>
+    </section>
+    <section>
       <item>
         <attribute name="label" translatable="yes">_Preferences</attribute>
         <attribute name="action">win.show-preferences</attribute>

@@ -7,6 +7,7 @@
     <class name="noback"/>
   </style>
   <property name="orientation">vertical</property>
+  <property name="width-request">250</property>
   <property name="margin-start">5</property>
   <property name="margin-top">0</property>
   <property name="margin-end">5</property>
@@ -15,9 +16,11 @@
   <child>
     <object class="GtkBox">
       <property name="orientation">horizontal</property>
-      <property name="homogeneous">true</property>
+      <property name="valign">center</property>
+      <property name="homogeneous">false</property>
       <child>
         <object class="GtkEditableLabel" id="title">
+          <property name="valign">center</property>
         <style>
           <class name="heading"/>
         </style>
@@ -25,7 +28,9 @@
       </child>
       <child>
         <object class="GtkButton">
+          <property name="valign">center</property>
           <property name="halign">end</property>
+          <property name="hexpand">true</property>
           <signal name="clicked" handler="add_card_clicked" object="KanbanColumn" swapped="no"/>
           <property name="tooltip-text">Add a new card</property>
           <property name="child">
@@ -37,6 +42,33 @@
             <class name="flat"/>
           </style>
         </object>
+      </child>
+      <child>
+      <object class="GtkRevealer" id="Revealer">
+        <property name="valign">center</property>
+        <property name="transition-type">GTK_REVEALER_TRANSITION_TYPE_SLIDE_LEFT</property>
+        <!--<child>
+          <object class="GtkBox">
+            <property name="valign">center</property>
+            <property name="orientation">horizontal</property> -->
+            <child>
+              <object class="GtkButton" id="RemoveBtn">
+              <property name="halign">end</property>
+              <property name="valign">center</property>
+              <signal name="clicked" handler="remove_column" object="KanbanColumn" swapped="no"/>
+                  <property name="child">
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">edit-delete-symbolic</property>
+                  </object>
+                  </property>
+                  <style>
+                    <class name="flat"/>
+                  </style>
+              </object>
+            </child>
+          <!--</object>
+        </child>-->
+      </object>
       </child>
     </object>
   </child> <!-- GtkBox HeaderSuffix -->

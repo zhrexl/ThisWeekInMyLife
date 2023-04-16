@@ -31,4 +31,7 @@ save_cards(gpointer user_data);
 
 G_DECLARE_FINAL_TYPE (KanbanWindow, kanban_window, KANBAN, WINDOW, AdwApplicationWindow)
 
+GtkWidget*
+create_column(KanbanWindow* Window, const gchar* title);
+
 G_END_DECLS

@@ -94,7 +94,7 @@ kanban_application_about_action (GSimpleAction *action,
 	                       "application-name", "This Week in My Life",
 	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
 	                       "developer-name", "zhrexl",
-	                       "version", "0.0.1",
+	                       "version", "0.0.2S",
 	                       "developers", developers,
 	                       "copyright", "© 2023 zhrexl",
 	                       NULL);
@@ -124,8 +124,22 @@ kanban_application_save_action (GSimpleAction *action,
 
         save_cards (Window);
 }
+static void
+kanban_application_new_action (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	KanbanApplication *self = user_data;
+
+	g_assert (KANBAN_IS_APPLICATION (self));
+
+        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
+
+        create_column (Window, "New Column");
+}
 
 static const GActionEntry app_actions[] = {
+        { "new", kanban_application_new_action },
         { "save", kanban_application_save_action },
 	{ "quit", kanban_application_quit_action },
 	{ "about", kanban_application_about_action },
@@ -144,4 +158,7 @@ kanban_application_init (KanbanApplication *self)
         gtk_application_set_accels_for_action (GTK_APPLICATION (self),
 	                                       "app.save",
 	                                       (const char *[]) { "<primary>s", NULL });
+        gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+	                                       "app.new",
+	                                       (const char *[]) { "<primary>n", NULL });
 }

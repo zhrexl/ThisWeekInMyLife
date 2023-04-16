@@ -13,6 +13,6 @@ Please, be careful.
 1. git clone this repository
 2. unzip & cd into folder
 3. run ```meson build```
-4. cd build
-5. ninja install
+4. ```cd build```
+5. ```ninja install```
 

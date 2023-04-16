@@ -24,16 +24,21 @@
 #include <json-glib/json-glib.h>
 
 static GParamSpec *needs_saving = NULL;
+static GParamSpec *edit_mode    = NULL;
+static guint SIGNAL_DELETE_COLUMN      = 0;
 
 struct _KanbanColumn
 {
   GtkBox parent_instance;
 
   GtkEditableLabel  *title;
+  GtkRevealer       *Revealer;
+  GtkButton         *RemoveBtn;
   GtkListBox        *CardsBox;
   GList             *Cards;
 
   gboolean needs_saving;
+  gboolean edit_mode;
 };
 
 G_DEFINE_FINAL_TYPE (KanbanColumn, kanban_column, GTK_TYPE_BOX)
@@ -45,12 +50,17 @@ kanban_column_new (void)
                       NULL);
 }
 
+static void
+remove_column(GtkButton* btn, gpointer user_data)
+{
+  g_signal_emit (user_data, SIGNAL_DELETE_COLUMN, 0);
+}
+
 void
 kanban_column_set_title(KanbanColumn* Column, const char *title)
 {
   gtk_editable_set_text (GTK_EDITABLE (Column->title), title);
 }
-
 
 GtkListBox*
 kanban_column_get_cards_box(KanbanColumn* Column)
@@ -61,7 +71,6 @@ kanban_column_get_cards_box(KanbanColumn* Column)
 void kanban_column_get_json(KanbanColumn* Column, gpointer CardObject)
 {
   JsonObject *object, *nested;
-
   object = json_object_new ();
 
   {
@@ -75,7 +84,7 @@ void kanban_column_get_json(KanbanColumn* Column, gpointer CardObject)
       const gchar* description = g_bytes_get_data (byteDescription, &size);
 
       json_object_set_string_member (nested, "description", description);
-      json_object_set_int_member (nested, "revealed", kanban_card_get_reveal (item));
+      json_object_set_int_member    (nested, "revealed", kanban_card_get_reveal (item));
       json_object_set_object_member (object, kanban_card_get_title (item), nested);
 
       g_bytes_unref (byteDescription);
@@ -119,15 +128,14 @@ kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar
   
   g_object_bind_property (Column, "needs-saving", card, "needs-saving", G_BINDING_BIDIRECTIONAL);
 
-//  g_signal_connect (Column, "notify::needs-saving", 
-     //                                           G_CALLBACK(teste), Column);
 }
 
+
 static void
-add_card_clicked(GtkButton* btn, gpointer data)
+add_card_clicked(GtkButton* btn, gpointer user_data)
 {
-  KanbanCard*   card   = kanban_card_new();
-  KanbanColumn* Column = (KanbanColumn*)data;
+  KanbanCard    *card   = kanban_card_new();
+  KanbanColumn* Column = (KanbanColumn*)user_data;
 
   gchar *title;
   title = g_strdup_printf("Activity #%d", g_list_length (Column->Cards));
@@ -146,6 +154,8 @@ kanban_get_property(GObject *object, guint property_id, GValue *value, GParamSpe
 
   if (property_id == 1)
     g_value_set_boolean (value, self->needs_saving);
+  else if (property_id == 2)
+    g_value_set_boolean (value, self->edit_mode);
   else
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 }
@@ -157,6 +167,8 @@ kanban_set_property(GObject *object, guint property_id, const GValue *value, GPa
 
   if (property_id == 1)
     self->needs_saving = g_value_get_boolean(value);
+  else if (property_id == 2)
+    self->edit_mode = g_value_get_boolean (value);
   else
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 }
@@ -169,16 +181,39 @@ kanban_column_class_init (KanbanColumnClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, "/com/github/zhrexl/kanban/kanban-column.ui");
   gtk_widget_class_bind_template_child (widget_class, KanbanColumn, title);
   gtk_widget_class_bind_template_child (widget_class, KanbanColumn, CardsBox);
+  gtk_widget_class_bind_template_child (widget_class, KanbanColumn, Revealer);
+  gtk_widget_class_bind_template_child (widget_class, KanbanColumn, RemoveBtn);
+
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), add_card_clicked);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), remove_column);
 
   GObjectClass *GClass = G_OBJECT_CLASS(klass);
   GClass->get_property = kanban_get_property;
   GClass->set_property = kanban_set_property;
 
   needs_saving = g_param_spec_boolean("needs-saving", "needsave", "Boolean value", 0, G_PARAM_READWRITE);
-  g_object_class_install_property (GClass, 1, needs_saving);
-}
+  edit_mode = g_param_spec_boolean("edit-mode", "editmode", "Boolean value", 0, G_PARAM_READWRITE);
 
+  g_object_class_install_property (GClass, 1, needs_saving);
+  g_object_class_install_property (GClass, 2, edit_mode);
+
+  SIGNAL_DELETE_COLUMN = g_signal_new ("delete-column",
+              G_TYPE_FROM_CLASS (klass),
+              G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+              0,
+              NULL,
+              NULL,
+              NULL,
+              G_TYPE_NONE,
+              0
+              );
+
+}
+static void
+title_changed(GtkEditableLabel* label, gpointer user_data )
+{
+    g_object_set(user_data, "needs-saving", 1, NULL);
+}
 static void
 kanban_column_init (KanbanColumn *self)
 {
@@ -186,5 +221,6 @@ kanban_column_init (KanbanColumn *self)
 
   /* Initialize private variable */
   self->Cards = NULL;
-
+  g_object_bind_property (self, "edit-mode", self->Revealer, "reveal-child", G_BINDING_BIDIRECTIONAL);
+  g_signal_connect(self->title,"changed",G_CALLBACK (title_changed), self);
 }
