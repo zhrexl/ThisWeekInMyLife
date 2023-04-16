@@ -36,10 +36,15 @@
   </screenshots>
   
   <releases>
+  <release version="0.0.2" date="2023-04-16">
+      <description>
+        <p>Its now possible to add and remove columns. General bug fixes.</p>
+      </description>
+  </release>
   <release version="0.0.1" date="2023-04-05">
       <description>
         <p>First release of ThisWeekInMyLife</p>
       </description>
-    </release>
+  </release>
   </releases>
 </component>
