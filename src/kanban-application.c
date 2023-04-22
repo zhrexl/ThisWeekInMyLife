@@ -22,6 +22,7 @@
 
 #include "kanban-application.h"
 #include "kanban-window.h"
+#include <glib/gi18n.h>
 
 struct _KanbanApplication
 {
@@ -91,7 +92,7 @@ kanban_application_about_action (GSimpleAction *action,
 	window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
 	adw_show_about_window (window,
-	                       "application-name", "This Week in My Life",
+	                       "application-name", _("This Week in My Life"),
 	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
 	                       "developer-name", "zhrexl",
 	                       "version", "0.0.2",
@@ -135,7 +136,7 @@ kanban_application_new_action (GSimpleAction *action,
 
         KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
 
-        create_column (Window, "New Column");
+        create_column (Window, _("New Column"));
 }
 
 static const GActionEntry app_actions[] = {

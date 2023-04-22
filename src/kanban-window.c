@@ -22,6 +22,7 @@
 
 #include "kanban-window.h"
 #include "kanban-column.h"
+#include <glib/gi18n.h>
 #include "json-glib/json-glib.h"
 
 const gchar FileName[] = ".thisweekinmylife\0";
@@ -80,7 +81,7 @@ save_cards(gpointer user_data)
   GError* error = NULL;
   g_file_set_contents (file_path, data, -1, &error);
   if (error != NULL) {
-    gchar* msg = g_strdup_printf ("Error saving file: %s\n", error->message);
+    gchar* msg = g_strdup_printf (_("Error saving file: %s\n"), error->message);
     g_printerr ("%s", msg);
     adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new (msg));
     g_free(msg);
@@ -88,7 +89,7 @@ save_cards(gpointer user_data)
     return 1;
   }
 
-  adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new ("Saved"));
+  adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new (_("Saved")));
 
   gtk_widget_set_sensitive (GTK_WIDGET (wnd->save), false);
   g_free(file_path);
@@ -125,15 +126,15 @@ save_before_quit(KanbanWindow* self)
 
   GtkWidget *dialog;
 
-  dialog = adw_message_dialog_new (GTK_WINDOW(self), ("Save Changes?"), NULL);
+  dialog = adw_message_dialog_new (GTK_WINDOW(self), _("Save Changes?"), NULL);
 
   adw_message_dialog_format_body (ADW_MESSAGE_DIALOG (dialog),
-                                ("Open document contains unsaved changes. Changes which are not saved will be permanently lost."));
+                                _("Open document contains unsaved changes. Changes which are not saved will be permanently lost."));
 
   adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG (dialog),
-                                  "cancel",  ("_Cancel"),
-                                  "discard",  ("_Discard"),
-                                  "save", ("_Save & Quit"),
+                                  "cancel",  _("_Cancel"),
+                                  "discard",  _("_Discard"),
+                                  "save", _("_Save & Quit"),
                                   NULL);
 
   adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "discard", ADW_RESPONSE_DESTRUCTIVE);
@@ -303,7 +304,7 @@ int loadjson (KanbanWindow* self, gchar* file_path)
 static gboolean
 load_ui(KanbanWindow* self)
 {
-  const char* Weekdays[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+  const char* Weekdays[] = {_("Monday"), _("Tuesday"), _("Wednesday"), _("Thursday"), _("Friday")};
 
   /* Restore json */
   const gchar* home_dir = g_get_home_dir ();
