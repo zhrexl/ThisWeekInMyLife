@@ -1,6 +1,12 @@
-data/com.github.zhrexl.kanban.desktop.in
-data/com.github.zhrexl.kanban.appdata.xml.in
-data/com.github.zhrexl.kanban.gschema.xml
+data/com.github.zhrexl.thisweekinmylife.desktop.in
+data/com.github.zhrexl.thisweekinmylife.appdata.xml.in
+data/com.github.zhrexl.thisweekinmylife.gschema.xml
 src/main.c
+src/kanban-application.c
+src/kanban-card.c
+src/kanban-card.ui
+src/kanban-column.c
+src/kanban-column.ui
 src/kanban-window.c
 src/kanban-window.ui
+
