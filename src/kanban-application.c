@@ -83,6 +83,8 @@ kanban_application_about_action (GSimpleAction *action,
                                  gpointer       user_data)
 {
 	static const char *developers[] = {"zhrexl https://github.com/zhrexl/", NULL};
+        static const char *artists[] = {"Brage Fuglseth", NULL};
+
 	KanbanApplication *self = user_data;
 	GtkWindow *window = NULL;
 
@@ -92,10 +94,11 @@ kanban_application_about_action (GSimpleAction *action,
 
 	adw_show_about_window (window,
 	                       "application-name", "This Week in My Life",
-	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
+	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
 	                       "developer-name", "zhrexl",
 	                       "version", "0.0.2",
 	                       "developers", developers,
+                               "artists", artists,
 	                       "copyright", "© 2023 zhrexl",
 	                       NULL);
 }
