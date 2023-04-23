@@ -1,4 +1,4 @@
-/* kanban-cards.h
+/* kanban-card.h
  *
  * Copyright 2023 zhrexl
  *
