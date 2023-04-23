@@ -36,7 +36,7 @@ struct _KanbanWindow
     GtkHeaderBar        *header_bar;
     GtkBox              *mainBox;
     GtkButton           *save;
-    GtkToggleButton       *EditBtn;
+    GtkToggleButton     *EditBtn;
     GList               *ListOfColumns;
 };
 
@@ -110,7 +110,8 @@ response (AdwMessageDialog* self, gchar* response, gpointer user_data)
   if (strstr (response, "save"))
     save_cards (user_data);
 
-  gtk_window_destroy (GTK_WINDOW (user_data));
+  GApplication* app = G_APPLICATION (gtk_window_get_application (GTK_WINDOW (user_data)));
+  g_application_quit (app);
 }
 
 
