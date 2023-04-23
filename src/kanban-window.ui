@@ -26,7 +26,7 @@
             <child type="start">
               <object class="GtkToggleButton" id="EditBtn">
                 <!--<signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>-->
-                <property name="icon-name">editor-symbolic</property>
+                <property name="icon-name">document-edit-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Toggle Edit Columns Mode</property>
               </object>
             </child>
