@@ -36,6 +36,13 @@
   </screenshots>
   
   <releases>
+  <release version="0.0.3" date="2023-04-23">
+      <description>
+        <p> New Icon </p>
+        <p> General bug fixes </p>
+        <p> Improved Perfomance</p>
+      </description>
+  </release>
   <release version="0.0.2" date="2023-04-16">
       <description>
         <p>Its now possible to add and remove columns. General bug fixes.</p>
