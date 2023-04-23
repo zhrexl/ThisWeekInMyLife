@@ -92,7 +92,7 @@ kanban_application_about_action (GSimpleAction *action,
 
 	adw_show_about_window (window,
 	                       "application-name", "This Week in My Life",
-	                       "application-icon", "com.github.zhrexl.ThisWeekInMyLife",
+	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
 	                       "developer-name", "zhrexl",
 	                       "version", "0.0.2",
 	                       "developers", developers,
