@@ -93,7 +93,7 @@ kanban_application_about_action (GSimpleAction *action,
 	window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
 	adw_show_about_window (window,
-	                       "application-name", "This Week in My Life",
+	                       "application-name", "Schedule",
 	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
 	                       "developer-name", "zhrexl",
 	                       "version", "0.0.3",

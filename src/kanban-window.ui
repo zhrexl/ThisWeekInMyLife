@@ -3,7 +3,7 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.2"/>
   <template class="KanbanWindow" parent="AdwApplicationWindow">
-    <property name="title" translatable="yes">This Week in My Life</property>
+    <property name="title" translatable="yes">Schedule</property>
     <property name="default-width">1200</property>
     <property name="default-height">700</property>
     <child>
