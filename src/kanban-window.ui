@@ -17,15 +17,7 @@
               <class name="flat"/>
             </style>
             <child type="start">
-              <object class="GtkButton" id="save">
-                <signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>
-                <property name="icon-name">document-save-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Save</property>
-              </object>
-            </child>
-            <child type="start">
               <object class="GtkToggleButton" id="EditBtn">
-                <!--<signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>-->
                 <property name="icon-name">document-edit-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Toggle Edit Columns Mode</property>
               </object>
@@ -46,6 +38,13 @@
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="save">
+                <signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Save</property>
               </object>
             </child>
           </object>
