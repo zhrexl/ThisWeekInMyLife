@@ -1,13 +1,8 @@
-# ThisWeekInMyLife
-This project is currently a MVP!!!!! 
-
-Not even alpha version!
+# Schedule
+ ![app-banner](https://user-images.githubusercontent.com/91388039/233837273-3a942cea-cdc4-48df-b595-cd2c6584d003.png)
+ 
+This project is currently under heavy development.
 Please, be careful.
-
-![image](https://user-images.githubusercontent.com/51864789/230498421-a357b45f-58fc-43d7-82eb-43667249cc6f.png)
-![image](https://user-images.githubusercontent.com/51864789/230498672-65592ba4-8be0-4055-93d3-537a99498a35.png)
-
-
 
 ## Install
 1. git clone this repository
