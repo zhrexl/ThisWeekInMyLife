@@ -24,9 +24,9 @@
               <property name="hexpand">true</property>
               <property name="can-target">false</property>
               <property name="can-focus">false</property>"
-            <style>
-                <class name="noback"/>
-            </style>
+              <style>
+                  <class name="noback"/>
+              </style>
             </object>
           </child>
           <child>
