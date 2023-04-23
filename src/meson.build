@@ -12,6 +12,8 @@ kanban_deps = [
   dependency('libadwaita-1', version: '>= 1.2'),
 ]
 
+subdir('utils')
+
 kanban_sources += gnome.compile_resources('thisweekinmylife-resources',
   'thisweekinmylife.gresource.xml',
   c_name: 'thisweekinmylife'

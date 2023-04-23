@@ -1,4 +1,4 @@
-/* kanban-window.c
+/* kanban-card.c
  *
  * Copyright 2023 zhrexl
  *
@@ -23,6 +23,7 @@
 #include "kanban-card.h"
 #include "kanban-column.h"
 #include "kanban-window.h"
+#include "utils/kanban-serializer.h"
 
 static GParamSpec *needs_saving = NULL;
 
@@ -92,84 +93,8 @@ kanban_card_set_reveal(KanbanCard* card, gboolean revealed)
     gtk_widget_set_can_target (GTK_WIDGET(card->LblCardName), true);
     gtk_widget_set_can_focus (GTK_WIDGET(card->LblCardName), true);
   }
-  gtk_revealer_set_reveal_child (card->revealercard,revealed);
 
-}
-
-static GBytes*
-kanban_card_get_full_description(GtkTextBuffer *buffer)
-{
-  GtkTextIter start, end;
-
-  GByteArray* ret = g_byte_array_new();
-  gtk_text_buffer_get_bounds(buffer, &start, &end);
-
-  GtkTextIter pos0,pos1;
-  GtkTextChildAnchor* anch;
-
-  pos0 = start;
-  do {
-    pos1 = pos0;
-    gboolean not_end = TRUE;
-    while (anch = gtk_text_iter_get_child_anchor(&pos1), anch == NULL)
-    {
-      not_end = gtk_text_iter_forward_char(&pos1);
-      if (!not_end)
-        break;
-    }
-
-    gchar* text = gtk_text_iter_get_text(&pos0, &pos1);
-    g_byte_array_append(ret, (guint8*)text, strlen(text));
-    g_free(text);
-
-    pos0 = pos1;
-
-    if (!not_end && !anch)
-      continue;
-
-    guint widgets_len = 0;
-    GtkWidget** widgets = gtk_text_child_anchor_get_widgets(anch, &widgets_len);
-
-    if ((!widgets_len) || (!widgets)){
-      continue;
-    }
-
-    for (int i = 0; i < widgets_len; i++)
-    {
-      gboolean isChecked = false;
-      const gchar* tasklbl = NULL;
-
-      for (GtkWidget* child = gtk_widget_get_first_child (widgets[i]);
-                                                      child != NULL;
-                        child = gtk_widget_get_next_sibling (child))
-      {
-        if (GTK_IS_CHECK_BUTTON (child))
-          isChecked = gtk_check_button_get_active (GTK_CHECK_BUTTON (child));
-        else if (GTK_IS_EDITABLE_LABEL (child))
-          tasklbl = gtk_editable_get_text (GTK_EDITABLE(child));
-      }
-
-      g_byte_array_append(ret, (guint8*)checktemplate, strlen(checktemplate));
-
-      if (isChecked)
-         g_byte_array_append(ret, (guint8*)donexml, strlen(donexml));
-      else
-        g_byte_array_append(ret, (guint8*)progress, strlen(progress));
-
-      g_byte_array_append(ret, (guint8*)titlexml, strlen(titlexml));
-
-      int len = strlen(tasklbl);
-      if (len)
-        g_byte_array_append(ret, (guint8*)(tasklbl), len);
-
-      g_byte_array_append(ret, (guint8*)endtitle, strlen(endtitle));
-    }
-
-  } while (gtk_text_iter_forward_char(&pos0));
-
-  g_byte_array_append (ret, (guint8*)nullbyte, 1);
-
-  return g_byte_array_free_to_bytes(ret);
+  gtk_revealer_set_reveal_child (card->revealercard, revealed);
 }
 
 /* the user must unref the returned pointer with g_bytes_unref() */
@@ -177,8 +102,7 @@ GBytes*
 kanban_card_get_description(KanbanCard* Card)
 {
   GtkTextBuffer* Buffer = gtk_text_view_get_buffer(Card->description);
-
-  return kanban_card_get_full_description(Buffer);
+  return get_serialized_buffer (Buffer);
 }
 
 static void
@@ -205,78 +129,49 @@ create_task(GtkTextView* text_view, GtkTextIter* iter, const gchar* title, gbool
 void
 kanban_card_set_description(KanbanCard* Card,const gchar* description)
 {
-  GtkTextBuffer*  buf = gtk_text_view_get_buffer(Card->description);
-  GtkTextIter     end;
-  
   int dsc_len = strlen(description);
 
   if (!dsc_len)
     return;
 
-  gchar* dataptr = (gchar*)description;
-
+  GtkTextBuffer*  buf = gtk_text_view_get_buffer(Card->description);
   /* Block changed signal to avoid unecessary unsaved file flag */
   g_signal_handler_block(buf, Card->description_changed);
 
-  /* TODO: it might not be necessary to use gtk_text_buffer_get_end_iter
-  *  instead perhaps I should set the iter to offset 0 */
+  KanbanUnserializedContent* KUnContent = get_unserialized_buffer (description);
 
-  gtk_text_buffer_set_text(buf, "", 0);
-  gtk_text_buffer_get_end_iter(buf, &end);
-
-  while (dsc_len > 0)
+  if (!KUnContent)
   {
-    gchar* n_dataptr = (gchar*)(g_strstr_len (dataptr, dsc_len, checktemplate));
+    g_print ("Error loading saved filed\n");
+    return;
+  }
 
-    if (n_dataptr == NULL)
-    {
-      gtk_text_buffer_insert(buf, &end, dataptr, dsc_len);
-      break;
-    }
-    else
-      gtk_text_buffer_insert(buf, &end, dataptr, n_dataptr-dataptr);
+  /* Set text description to buffer */
+  GBytes* bytes = g_byte_array_free_to_bytes(KUnContent->text);
+  gsize    size;
+  char* text = (char*)g_bytes_get_data (bytes, &size);
 
-    // Create Anchor Child
-    gtk_text_buffer_get_iter_at_offset (buf, &end, n_dataptr-description);
+  GtkTextIter iter;
+  gtk_text_buffer_set_text (buf, text, size);
+  gtk_text_buffer_get_end_iter(buf, &iter);
+  g_bytes_unref (bytes);
 
-    n_dataptr   += sizeof(checktemplate)/sizeof(checktemplate[0]) -1;
-
-    gchar* title = g_strstr_len(n_dataptr, strlen(n_dataptr), titlexml);
-
-    if (title == NULL)
-    {
-      g_print("Corrupted json :(\n");
-      break;
-    }
-
-    gchar* done     = g_strstr_len(n_dataptr,title-n_dataptr,"done");
-
-    gboolean active = false;
-
-    if (done)
-      active  = true;
-    else
-      active  = false;
-
-    title += sizeof(titlexml)/sizeof(titlexml[0]) - 1;
-    gchar* next = g_strstr_len(title, strlen(title), endtitle);
-
-    if (!next)
-    {
-      g_print("Corrupted json :(\n");
-      break;
-    }
-
-    gchar* taskname = g_strndup (title, next-title);
-    next    += sizeof(endtitle)/sizeof(endtitle[0]) - 1;
-    dsc_len -= (next - dataptr);
-    dataptr  = next;
-
-    create_task (Card->description, &end, taskname, active);
-
-    g_free(taskname);
+  /* Create and insert the anchors in GtkTextView */
+  GList* elem = NULL;
+  /* For each inserted anchor offset increments by one */
+  int i = 0;
+  for(elem = KUnContent->anchors; elem; elem = elem->next)
+  {
+    KanbanAnchor* anchor = elem->data;
+    gtk_text_iter_set_offset (&iter, anchor->offset + i);
+    create_task (Card->description, &iter, anchor->title, anchor->active);
+    g_free(anchor->title);
+    i++;
   }
   g_signal_handler_unblock(buf, Card->description_changed);
+
+  g_list_free (KUnContent->anchors);
+  free(KUnContent);
 }
 
 static void
@@ -291,7 +186,6 @@ insert_checkbox(GtkButton* btn, gpointer data)
 
   create_task(text_view, &iter, "Task #", false);
 }
-
 
 
 static void
@@ -342,20 +236,32 @@ kanban_card_class_init (KanbanCardClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class, 
                 "/com/github/zhrexl/kanban/kanban-card.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, KanbanCard, handlerDrag);
-  gtk_widget_class_bind_template_child (widget_class, KanbanCard, LblCardName);
-  gtk_widget_class_bind_template_child (widget_class, KanbanCard, revealercard);
-  gtk_widget_class_bind_template_child (widget_class, KanbanCard, description);
-  gtk_widget_class_bind_template_child (widget_class, KanbanCard, BtnContent);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, handlerDrag);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, LblCardName);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, revealercard);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, description);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, BtnContent);
 
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), reveal_clicked);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), delete_clicked);
-  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass), insert_checkbox);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass),
+                                           reveal_clicked);
+
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass),
+                                           delete_clicked);
+
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass),
+                                           insert_checkbox);
 
   GObjectClass *GClass = G_OBJECT_CLASS(klass);
   GClass->get_property = kanban_get_property;
   GClass->set_property = kanban_set_property;
-  needs_saving = g_param_spec_boolean("needs-saving", "needsave", "Boolean value", 0, G_PARAM_READWRITE);
+  needs_saving = g_param_spec_boolean("needs-saving", "needsave",
+                                      "Boolean value", 0,
+                                      G_PARAM_READWRITE);
   g_object_class_install_property (GClass, 1, needs_saving);
 }
 
@@ -392,7 +298,8 @@ kanban_card_init (KanbanCard *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
   source = gtk_drag_source_new ();
-  gtk_widget_add_controller (GTK_WIDGET (self->handlerDrag), GTK_EVENT_CONTROLLER (source));
+  gtk_widget_add_controller (GTK_WIDGET (self->handlerDrag),
+                             GTK_EVENT_CONTROLLER (source));
 
   g_signal_connect (source, "prepare", G_CALLBACK (css_drag_prepare), self);
 

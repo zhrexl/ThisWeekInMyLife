@@ -3,7 +3,7 @@
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.2"/>
   <template class="KanbanWindow" parent="AdwApplicationWindow">
-    <property name="title" translatable="yes">This Week in My Life</property>
+    <property name="title" translatable="yes">Schedule</property>
     <property name="default-width">1200</property>
     <property name="default-height">700</property>
     <child>
@@ -17,35 +17,22 @@
               <class name="flat"/>
             </style>
             <child type="start">
-              <object class="GtkButton" id="save">
-                <signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>
-                <property name="icon-name">document-save-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Save</property>
-              </object>
-            </child>
-            <child type="start">
               <object class="GtkToggleButton" id="EditBtn">
-                <!--<signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>-->
-                <property name="icon-name">editor-symbolic</property>
+                <property name="icon-name">document-edit-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Toggle Edit Columns Mode</property>
               </object>
             </child>
-            <!--<child type="start">
-              <object class="GtkButton">
-                <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
-                <property name="icon-name">document-open-symbolic</property>
-              </object>
-            </child>
-            <child type="start">
-              <object class="GtkButton">
-                <signal name="clicked" handler="save_before_quit" object="KanbanWindow" swapped="yes"/>
-                <property name="icon-name">document-save-symbolic</property>
-              </object>
-            </child>-->
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="save">
+                <signal name="clicked" handler="save_cards" object="KanbanWindow" swapped="yes"/>
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Save</property>
               </object>
             </child>
           </object>

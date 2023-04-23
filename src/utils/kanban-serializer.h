@@ -1,4 +1,4 @@
-/* kanban-application.h
+/* kanban-serializer.h
  *
  * Copyright 2023 zhrexl
  *
@@ -20,15 +20,26 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk-4.0/gtk/gtk.h>
 
-G_BEGIN_DECLS
+typedef struct
+{
+  GByteArray* text;
+  GList*  anchors;
+} KanbanUnserializedContent;
 
-#define KANBAN_TYPE_APPLICATION (kanban_application_get_type())
+/*
+ * Use g_free(KanbanAnchor->title) to release the string
+ * */
+typedef struct
+{
+  guint offset;
+  gchar* title;
+  gboolean active;
+} KanbanAnchor;
 
-G_DECLARE_FINAL_TYPE (KanbanApplication, kanban_application, KANBAN, APPLICATION, AdwApplication)
+GBytes*
+get_serialized_buffer(GtkTextBuffer *buffer);
 
-KanbanApplication *kanban_application_new (const char        *application_id,
-                                           GApplicationFlags  flags);
-
-G_END_DECLS
+KanbanUnserializedContent*
+get_unserialized_buffer(const gchar* description);

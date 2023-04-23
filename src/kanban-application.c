@@ -1,6 +1,6 @@
 /* kanban-application.c
  *
- * Copyright 2023 Douglas
+ * Copyright 2023 zhrexl
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,10 +93,10 @@ kanban_application_about_action (GSimpleAction *action,
 	window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
 	adw_show_about_window (window,
-	                       "application-name", "This Week in My Life",
+	                       "application-name", "Schedule",
 	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
 	                       "developer-name", "zhrexl",
-	                       "version", "0.0.2",
+	                       "version", "0.0.3",
 	                       "developers", developers,
                                "artists", artists,
 	                       "copyright", "© 2023 zhrexl",
