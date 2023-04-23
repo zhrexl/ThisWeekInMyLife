@@ -148,7 +148,6 @@ save_before_quit(KanbanWindow* self)
   gtk_window_present (GTK_WINDOW (dialog));
 
   return TRUE;
-  //save_cards (self);
 }
 
 
