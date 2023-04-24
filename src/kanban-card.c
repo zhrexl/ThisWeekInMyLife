@@ -135,7 +135,7 @@ kanban_card_set_description(KanbanCard* Card,const gchar* description)
     return;
 
   GtkTextBuffer*  buf = gtk_text_view_get_buffer(Card->description);
-  /* Block changed signal to avoid unecessary unsaved file flag */
+  /* Block changed signal to avoid unnecessary unsaved file flag */
   g_signal_handler_block(buf, Card->description_changed);
 
   KanbanUnserializedContent* KUnContent = get_unserialized_buffer (description);
