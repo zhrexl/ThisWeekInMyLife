@@ -8,9 +8,14 @@
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>AGPL-3.0-or-later</project_license>
   <content_rating type="oars-1.1" />
+  <developer_name>zhrexl</developer_name>
+  <developer id="io.github.zhrexl">
+    <name>zhrexl</name>
+  </developer>
   
   <url type="homepage">https://github.com/zhrexl/ThisWeekInMyLife</url>
   <url type="bugtracker">https://github.com/zhrexl/ThisWeekInMyLife/issues</url>
+  <url type="vcs-browser">https://github.com/zhrexl/ThisWeekInMyLife</url>
   <url type="donation">https://www.buymeacoffee.com/zhrexl</url>
   
   <supports>
