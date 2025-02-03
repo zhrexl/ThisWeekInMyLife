@@ -18,9 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// TODO: Implement a remove button to remove column. The documentation of this
-// program is really lacking, but now we know what is to be done :)
-
 #include "kanban-column.h"
 #include "config.h"
 #include "gtk/gtk.h"
@@ -36,7 +33,7 @@ struct _KanbanColumn {
 
   GtkEditableLabel *title;
   GtkRevealer *Revealer;
-  GtkButton *RemoveBtn; // Unused and nothing implemented with
+  GtkButton *RemoveBtn;
   GtkListBox *CardsBox;
   GList *Cards;
 
@@ -192,10 +189,6 @@ static void title_changed(GtkEditableLabel *label, gpointer user_data) {
   g_object_set(user_data, "needs-saving", 1, NULL);
 }
 
-/* static void column_removed(GtkButton *button, gpointer user_data) {
-  g_object_set(user_data, "needs-saving", 1, NULL);
-} */
-
 static void kanban_column_init(KanbanColumn *self) {
   gtk_widget_init_template(GTK_WIDGET(self));
 
@@ -204,7 +197,4 @@ static void kanban_column_init(KanbanColumn *self) {
   g_object_bind_property(self, "edit-mode", self->Revealer, "reveal-child",
                          G_BINDING_BIDIRECTIONAL);
   g_signal_connect(self->title, "changed", G_CALLBACK(title_changed), self);
-  // g_signal_connect(self->RemoveBtn, "clicked", G_CALLBACK(column_removed),
-  // self);
-  // TODO: Implement removal of columns
 }
