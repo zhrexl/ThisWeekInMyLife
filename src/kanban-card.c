@@ -21,6 +21,8 @@
 #include "config.h"
 
 #include "kanban-card.h"
+#include "glib-object.h"
+#include "gtk/gtk.h"
 #include "kanban-column.h"
 #include "kanban-window.h"
 #include "utils/kanban-serializer.h"
@@ -58,7 +60,9 @@ KanbanCard* kanban_card_new (void)
 void
 kanban_card_set_title(KanbanCard* Card, const char *title)
 {
+  // This is literally where it should give away the signal for needing to save
   gtk_editable_set_text (GTK_EDITABLE (Card->LblCardName), title);
+  
 }
 
 const gchar*
@@ -290,6 +294,14 @@ kanban_card_changed(GtkTextBuffer* buf, gpointer user_data)
     g_object_set (G_OBJECT(user_data), "needs-saving", 1, NULL);
 
 }
+
+static void
+kanban_card_title_changed(GtkEditableLabel* label, gpointer user_data)
+{
+  g_object_set(user_data, "needs-saving", 1, NULL);
+
+}
+
 static void
 kanban_card_init (KanbanCard *self)
 {
@@ -304,6 +316,10 @@ kanban_card_init (KanbanCard *self)
   g_signal_connect (source, "prepare", G_CALLBACK (css_drag_prepare), self);
 
   buf = gtk_text_view_get_buffer(self->description);
+  
   self->description_changed = g_signal_connect (buf, "changed", 
                                                 G_CALLBACK(kanban_card_changed), self);
+
+  g_signal_connect(self->LblCardName, "changed", G_CALLBACK(kanban_card_title_changed), self);
+  // Both the description and the title are separate, so we had to implement them independently
 }
