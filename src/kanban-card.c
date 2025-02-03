@@ -55,7 +55,6 @@ KanbanCard *kanban_card_new(void) {
 }
 
 void kanban_card_set_title(KanbanCard *Card, const char *title) {
-  // This is literally where it should give away the signal for needing to save
   gtk_editable_set_text(GTK_EDITABLE(Card->LblCardName), title);
 }
 
