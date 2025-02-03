@@ -18,9 +18,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// TODO: Implement a way to colorize cards, and have the color be saved in JSON
+// format too
+
 #include "config.h"
 
 #include "glib-object.h"
+#include "glib.h"
 #include "gtk/gtk.h"
 #include "kanban-card.h"
 #include "kanban-column.h"
@@ -171,6 +175,8 @@ static void delete_clicked(GtkButton *btn, gpointer user_data) {
   GtkWidget *old_scrollWnd = gtk_widget_get_parent(old_view);
   KanbanColumn *old_col = KANBAN_COLUMN(gtk_widget_get_parent(old_scrollWnd));
 
+  // Until now, we need a condition to not prompt save if nothing got changed
+  g_object_set(user_data, "needs-saving", 1, NULL);
   kanban_column_remove_card(old_col, user_data);
 }
 
