@@ -204,6 +204,7 @@ static void kanban_column_init(KanbanColumn *self) {
   g_object_bind_property(self, "edit-mode", self->Revealer, "reveal-child",
                          G_BINDING_BIDIRECTIONAL);
   g_signal_connect(self->title, "changed", G_CALLBACK(title_changed), self);
-  // g_signal_connect(self->RemoveBtn, "clicked", G_CALLBACK(column_removed), self); 
+  // g_signal_connect(self->RemoveBtn, "clicked", G_CALLBACK(column_removed),
+  // self);
   // TODO: Implement removal of columns
 }

@@ -20,22 +20,19 @@
 
 #include "config.h"
 
-#include <glib/gi18n.h>
 #include "kanban-application.h"
+#include <glib/gi18n.h>
 
-int
-main (int   argc,
-      char *argv[])
-{
-	g_autoptr(KanbanApplication) app = NULL;
-	int ret;
+int main(int argc, char *argv[]) {
+  g_autoptr(KanbanApplication) app = NULL;
+  int ret;
 
-	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-	textdomain (GETTEXT_PACKAGE);
+  bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+  bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
+  textdomain(GETTEXT_PACKAGE);
 
-	app = kanban_application_new ("io.github.zhrexl.thisweekinmylife", 0);
-	ret = g_application_run (G_APPLICATION (app), argc, argv);
+  app = kanban_application_new("io.github.zhrexl.thisweekinmylife", 0);
+  ret = g_application_run(G_APPLICATION(app), argc, argv);
 
-	return ret;
+  return ret;
 }
