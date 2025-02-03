@@ -288,11 +288,7 @@ css_drag_prepare (GtkDragSource *source,
 static void
 kanban_card_changed(GtkTextBuffer* buf, gpointer user_data)
 {
-  KanbanCard *self = KANBAN_CARD(user_data);
-  
-  if (!self->needs_saving)
     g_object_set (G_OBJECT(user_data), "needs-saving", 1, NULL);
-
 }
 
 static void
