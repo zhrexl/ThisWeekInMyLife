@@ -22,20 +22,24 @@
 
 #include <gtk-4.0/gtk/gtk.h>
 
-typedef struct {
-  GByteArray *text;
-  GList *anchors;
+typedef struct
+{
+  GByteArray* text;
+  GList*  anchors;
 } KanbanUnserializedContent;
 
 /*
  * Use g_free(KanbanAnchor->title) to release the string
  * */
-typedef struct {
+typedef struct
+{
   guint offset;
-  gchar *title;
+  gchar* title;
   gboolean active;
 } KanbanAnchor;
 
-GBytes *get_serialized_buffer(GtkTextBuffer *buffer);
+GBytes*
+get_serialized_buffer(GtkTextBuffer *buffer);
 
-KanbanUnserializedContent *get_unserialized_buffer(const gchar *description);
+KanbanUnserializedContent*
+get_unserialized_buffer(const gchar* description);

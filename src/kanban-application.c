@@ -27,68 +27,84 @@
 #include "gtk/gtkshortcut.h"
 #include "kanban-window.h"
 
-struct _KanbanApplication {
-  AdwApplication parent_instance;
+struct _KanbanApplication
+{
+	AdwApplication parent_instance;
 };
 
-G_DEFINE_TYPE(KanbanApplication, kanban_application, ADW_TYPE_APPLICATION)
+G_DEFINE_TYPE (KanbanApplication, kanban_application, ADW_TYPE_APPLICATION)
 
-KanbanApplication *kanban_application_new(const char *application_id,
-                                          GApplicationFlags flags) {
-  g_return_val_if_fail(application_id != NULL, NULL);
+KanbanApplication *
+kanban_application_new (const char        *application_id,
+                        GApplicationFlags  flags)
+{
+	g_return_val_if_fail (application_id != NULL, NULL);
 
-  return g_object_new(KANBAN_TYPE_APPLICATION, "application-id", application_id,
-                      "flags", flags, NULL);
+	return g_object_new (KANBAN_TYPE_APPLICATION,
+	                     "application-id", application_id,
+	                     "flags", flags,
+	                     NULL);
 }
 
-static void kanban_application_activate(GApplication *app) {
-  GtkWindow *window;
+static void
+kanban_application_activate (GApplication *app)
+{
+	GtkWindow *window;
 
-  g_assert(KANBAN_IS_APPLICATION(app));
+	g_assert (KANBAN_IS_APPLICATION (app));
 
-  window = gtk_application_get_active_window(GTK_APPLICATION(app));
+	window = gtk_application_get_active_window (GTK_APPLICATION (app));
 
-  if (window == NULL)
-    window = g_object_new(KANBAN_TYPE_WINDOW, "application", app, NULL);
+	if (window == NULL)
+		window = g_object_new (KANBAN_TYPE_WINDOW,
+		                       "application", app,
+		                       NULL);
 
-  GtkCssProvider *provider = gtk_css_provider_new();
-  gtk_css_provider_load_from_resource(
-      provider, "/com/github/zhrexl/kanban/stylesheet.css");
+        GtkCssProvider* provider = gtk_css_provider_new ();
+        gtk_css_provider_load_from_resource (provider,
+                                       "/com/github/zhrexl/kanban/stylesheet.css");
 
-  GdkDisplay *display = gtk_widget_get_display(GTK_WIDGET(window));
-  gtk_style_context_add_provider_for_display(
-      display, GTK_STYLE_PROVIDER(provider),
-      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+        GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (window));
+        gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 
-  g_object_unref(provider);
+        g_object_unref (provider);
 
-  gtk_window_present(window);
+
+	gtk_window_present (window);
 }
 
-static void kanban_application_class_init(KanbanApplicationClass *klass) {
-  GApplicationClass *app_class = G_APPLICATION_CLASS(klass);
+static void
+kanban_application_class_init (KanbanApplicationClass *klass)
+{
+	GApplicationClass *app_class = G_APPLICATION_CLASS (klass);
 
-  app_class->activate = kanban_application_activate;
+	app_class->activate = kanban_application_activate;
 }
 
-static void kanban_application_about_action(GSimpleAction *action,
-                                            GVariant *parameter,
-                                            gpointer user_data) {
-  static const char *developers[] = {"zhrexl https://github.com/zhrexl/", NULL};
-  static const char *artists[] = {"Brage Fuglseth", NULL};
+static void
+kanban_application_about_action (GSimpleAction *action,
+                                 GVariant      *parameter,
+                                 gpointer       user_data)
+{
+	static const char *developers[] = {"zhrexl https://github.com/zhrexl/", NULL};
+        static const char *artists[] = {"Brage Fuglseth", NULL};
 
-  KanbanApplication *self = user_data;
-  GtkWindow *window = NULL;
+	KanbanApplication *self = user_data;
+	GtkWindow *window = NULL;
 
-  g_assert(KANBAN_IS_APPLICATION(self));
+	g_assert (KANBAN_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window(GTK_APPLICATION(self));
+	window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
-  adw_show_about_window(window, "application-name", "Schedule",
-                        "application-icon", "io.github.zhrexl.thisweekinmylife",
-                        "developer-name", "zhrexl", "version", "0.0.3",
-                        "developers", developers, "artists", artists,
-                        "copyright", "© 2023 zhrexl", NULL);
+	adw_show_about_window (window,
+	                       "application-name", "Schedule",
+	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
+	                       "developer-name", "zhrexl",
+	                       "version", "0.0.3",
+	                       "developers", developers,
+                               "artists", artists,
+	                       "copyright", "© 2023 zhrexl",
+	                       NULL);
 }
 
 static void response(AdwMessageDialog *self, gchar *response,
@@ -133,56 +149,109 @@ static gboolean save_before_quit(KanbanApplication *self) {
   return TRUE;
 }
 
-static void kanban_application_quit_action(GSimpleAction *action,
-                                           GVariant *parameter,
-                                           gpointer user_data) {
-  KanbanApplication *self = user_data;
+static void response(AdwMessageDialog *self, gchar *response,
+                     gpointer user_data) {
+  if (strstr(response, "cancel"))
+    return;
 
-  g_assert(KANBAN_IS_APPLICATION(self));
+  GApplication *app = G_APPLICATION(user_data);
+  g_application_quit(app);
+}
+
+// Note to others: The last step in QoL improvement was to include prompt even for leaving the app, should there be unsaved changes,
+// since I've often encountered that I would forget to save, and thus there is no warning, resulting in sighes and rewrites.
+static gboolean save_before_quit(KanbanApplication *self) {
+  GtkWindow *window = gtk_application_get_active_window(GTK_APPLICATION(self));
+  // TODO: Need a way to get a condition to check against to not have to constantly prompt for save
+
+  /* if (!need_to_save) {
+    return false;
+  } */
+
+  GtkWidget *dialog;
+
+  dialog = adw_message_dialog_new(GTK_WINDOW(window), ("Quick check!"), NULL);
+
+  adw_message_dialog_format_body(
+      ADW_MESSAGE_DIALOG(dialog),
+      ("Have you saved, or do you want to make further changes, or quit now?"));
+
+  adw_message_dialog_add_responses(ADW_MESSAGE_DIALOG(dialog), "cancel",
+                                   ("_Cancel"), "quit", ("_Quit"), NULL);
+
+  adw_message_dialog_set_response_appearance(
+      ADW_MESSAGE_DIALOG(dialog), "quit", ADW_RESPONSE_DESTRUCTIVE);
+  adw_message_dialog_set_default_response(ADW_MESSAGE_DIALOG(dialog), "cancel");
+  adw_message_dialog_set_close_response(ADW_MESSAGE_DIALOG(dialog), "cancel");
+
+  g_signal_connect(dialog, "response", G_CALLBACK(response), self);
+
+  gtk_window_present(GTK_WINDOW(dialog));
+
+  return TRUE;
+}
+
+static void
+kanban_application_quit_action (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	KanbanApplication *self = user_data;
+
+	g_assert (KANBAN_IS_APPLICATION (self));
 
   save_before_quit(self);
 
   // g_application_quit(G_APPLICATION(self)); Disabled until further changes
 }
-static void kanban_application_save_action(GSimpleAction *action,
-                                           GVariant *parameter,
-                                           gpointer user_data) {
-  KanbanApplication *self = user_data;
+static void
+kanban_application_save_action (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	KanbanApplication *self = user_data;
 
-  g_assert(KANBAN_IS_APPLICATION(self));
+	g_assert (KANBAN_IS_APPLICATION (self));
 
-  KanbanWindow *Window =
-      KANBAN_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(self)));
+        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
 
-  save_cards(Window);
+        save_cards (Window);
 }
-static void kanban_application_new_action(GSimpleAction *action,
-                                          GVariant *parameter,
-                                          gpointer user_data) {
-  KanbanApplication *self = user_data;
+static void
+kanban_application_new_action (GSimpleAction *action,
+                                GVariant      *parameter,
+                                gpointer       user_data)
+{
+	KanbanApplication *self = user_data;
 
-  g_assert(KANBAN_IS_APPLICATION(self));
+	g_assert (KANBAN_IS_APPLICATION (self));
 
-  KanbanWindow *Window =
-      KANBAN_WINDOW(gtk_application_get_active_window(GTK_APPLICATION(self)));
+        KanbanWindow* Window = KANBAN_WINDOW (gtk_application_get_active_window (GTK_APPLICATION (self)));
 
-  create_column(Window, "New Column");
+        create_column (Window, "New Column");
 }
 
 static const GActionEntry app_actions[] = {
-    {"new", kanban_application_new_action},
-    {"save", kanban_application_save_action},
-    {"quit", kanban_application_quit_action},
-    {"about", kanban_application_about_action},
+        { "new", kanban_application_new_action },
+        { "save", kanban_application_save_action },
+	{ "quit", kanban_application_quit_action },
+	{ "about", kanban_application_about_action },
 };
 
-static void kanban_application_init(KanbanApplication *self) {
-  g_action_map_add_action_entries(G_ACTION_MAP(self), app_actions,
-                                  G_N_ELEMENTS(app_actions), self);
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.quit",
-                                        (const char *[]){"<primary>q", NULL});
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.save",
-                                        (const char *[]){"<primary>s", NULL});
-  gtk_application_set_accels_for_action(GTK_APPLICATION(self), "app.new",
-                                        (const char *[]){"<primary>n", NULL});
+static void
+kanban_application_init (KanbanApplication *self)
+{
+	g_action_map_add_action_entries (G_ACTION_MAP (self),
+	                                 app_actions,
+	                                 G_N_ELEMENTS (app_actions),
+	                                 self);
+	gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+	                                       "app.quit",
+	                                       (const char *[]) { "<primary>q", NULL });
+        gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+	                                       "app.save",
+	                                       (const char *[]) { "<primary>s", NULL });
+        gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+	                                       "app.new",
+	                                       (const char *[]) { "<primary>n", NULL });
 }

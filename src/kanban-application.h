@@ -26,10 +26,9 @@ G_BEGIN_DECLS
 
 #define KANBAN_TYPE_APPLICATION (kanban_application_get_type())
 
-G_DECLARE_FINAL_TYPE(KanbanApplication, kanban_application, KANBAN, APPLICATION,
-                     AdwApplication)
+G_DECLARE_FINAL_TYPE (KanbanApplication, kanban_application, KANBAN, APPLICATION, AdwApplication)
 
-KanbanApplication *kanban_application_new(const char *application_id,
-                                          GApplicationFlags flags);
+KanbanApplication *kanban_application_new (const char        *application_id,
+                                           GApplicationFlags  flags);
 
 G_END_DECLS

@@ -26,21 +26,27 @@ G_BEGIN_DECLS
 
 #define KANBAN_COLUMN_TYPE (kanban_column_get_type())
 
-G_DECLARE_FINAL_TYPE(KanbanColumn, kanban_column, KANBAN, COLUMN, GtkBox)
+G_DECLARE_FINAL_TYPE (KanbanColumn, kanban_column, KANBAN, COLUMN, GtkBox)
 
-KanbanColumn *kanban_column_new(void);
+KanbanColumn
+*kanban_column_new(void);
 
-void kanban_column_set_title(KanbanColumn *Card, const char *title);
+void
+kanban_column_set_title(KanbanColumn* Card, const char *title);
 
-GtkListBox *kanban_column_get_cards_box(KanbanColumn *Column);
+GtkListBox*
+kanban_column_get_cards_box(KanbanColumn* Column);
 
-void kanban_column_add_card(KanbanColumn *Column, gpointer card);
+void
+kanban_column_add_card(KanbanColumn* Column, gpointer card);
 
-void kanban_column_remove_card(KanbanColumn *Column, gpointer card);
+void
+kanban_column_remove_card(KanbanColumn* Column, gpointer card);
 
-void kanban_column_get_json(KanbanColumn *Column, gpointer CardObject);
+void kanban_column_get_json(KanbanColumn* Column, gpointer CardObject);
 
-void kanban_column_add_new_card(KanbanColumn *Column, const gchar *title,
-                                const gchar *description, gboolean revealed);
+void
+kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar* description, gboolean revealed);
 
 G_END_DECLS
+

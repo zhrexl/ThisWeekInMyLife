@@ -26,20 +26,26 @@ G_BEGIN_DECLS
 
 #define KANBAN_TYPE_CARD (kanban_card_get_type())
 
-G_DECLARE_FINAL_TYPE(KanbanCard, kanban_card, KANBAN, CARD, GtkListBoxRow)
+G_DECLARE_FINAL_TYPE (KanbanCard, kanban_card, KANBAN, CARD, GtkListBoxRow)
 
 KanbanCard *kanban_card_new(void);
 
-void kanban_card_set_title(KanbanCard *Card, const char *title);
+void
+kanban_card_set_title(KanbanCard* Card, const char *title);
 
-const gchar *kanban_card_get_title(KanbanCard *Card);
+const gchar*
+kanban_card_get_title(KanbanCard* Card);
 
-void kanban_card_set_reveal(KanbanCard *card, gboolean revealed);
+void
+kanban_card_set_reveal(KanbanCard* card, gboolean revealed);
 
-gboolean kanban_card_get_reveal(KanbanCard *Card);
+gboolean
+kanban_card_get_reveal(KanbanCard* Card);
 
-GBytes *kanban_card_get_description(KanbanCard *Card);
+GBytes*
+kanban_card_get_description(KanbanCard* Card);
 
-void kanban_card_set_description(KanbanCard *Card, const gchar *description);
+void
+kanban_card_set_description(KanbanCard* Card,const gchar* description);
 
 G_END_DECLS
