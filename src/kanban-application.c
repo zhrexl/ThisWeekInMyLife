@@ -21,6 +21,10 @@
 #include "config.h"
 
 #include "kanban-application.h"
+#include "gio/gio.h"
+#include "glib.h"
+#include "gtk/gtk.h"
+#include "gtk/gtkshortcut.h"
 #include "kanban-window.h"
 
 struct _KanbanApplication {
@@ -87,6 +91,48 @@ static void kanban_application_about_action(GSimpleAction *action,
                         "copyright", "© 2023 zhrexl", NULL);
 }
 
+static void response(AdwMessageDialog *self, gchar *response,
+                     gpointer user_data) {
+  if (strstr(response, "cancel"))
+    return;
+
+  GApplication *app = G_APPLICATION(user_data);
+  g_application_quit(app);
+}
+
+// Note to others: The last step in QoL improvement was to include prompt even for leaving the app, should there be unsaved changes,
+// since I've often encountered that I would forget to save, and thus there is no warning, resulting in sighes and rewrites.
+static gboolean save_before_quit(KanbanApplication *self) {
+  GtkWindow *window = gtk_application_get_active_window(GTK_APPLICATION(self));
+  // TODO: Need a way to get a condition to check against to not have to constantly prompt for save
+
+  /* if (!need_to_save) {
+    return false;
+  } */
+
+  GtkWidget *dialog;
+
+  dialog = adw_message_dialog_new(GTK_WINDOW(window), ("Quick check!"), NULL);
+
+  adw_message_dialog_format_body(
+      ADW_MESSAGE_DIALOG(dialog),
+      ("Have you saved, or do you want to make further changes, or quit now?"));
+
+  adw_message_dialog_add_responses(ADW_MESSAGE_DIALOG(dialog), "cancel",
+                                   ("_Cancel"), "quit", ("_Quit"), NULL);
+
+  adw_message_dialog_set_response_appearance(
+      ADW_MESSAGE_DIALOG(dialog), "quit", ADW_RESPONSE_DESTRUCTIVE);
+  adw_message_dialog_set_default_response(ADW_MESSAGE_DIALOG(dialog), "cancel");
+  adw_message_dialog_set_close_response(ADW_MESSAGE_DIALOG(dialog), "cancel");
+
+  g_signal_connect(dialog, "response", G_CALLBACK(response), self);
+
+  gtk_window_present(GTK_WINDOW(dialog));
+
+  return TRUE;
+}
+
 static void kanban_application_quit_action(GSimpleAction *action,
                                            GVariant *parameter,
                                            gpointer user_data) {
@@ -94,7 +140,9 @@ static void kanban_application_quit_action(GSimpleAction *action,
 
   g_assert(KANBAN_IS_APPLICATION(self));
 
-  g_application_quit(G_APPLICATION(self));
+  save_before_quit(self);
+
+  // g_application_quit(G_APPLICATION(self)); Disabled until further changes
 }
 static void kanban_application_save_action(GSimpleAction *action,
                                            GVariant *parameter,
