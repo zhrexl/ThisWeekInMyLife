@@ -41,6 +41,12 @@
   </screenshots>
   
   <releases>
+    <release version="0.0.4" date="2025-02-10">
+        <description>
+          <p> Remember Window Size </p>
+          <p> Bug Fixes </p>
+        </description>
+    </release>
   <release version="0.0.3" date="2023-04-23">
       <description>
         <p> New Icon </p>
