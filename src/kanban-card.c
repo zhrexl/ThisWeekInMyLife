@@ -18,9 +18,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// TODO: Implement a way to colorize cards, and have the color be saved in JSON
+// format too
+
 #include "config.h"
 
 #include "kanban-card.h"
+#include "glib-object.h"
+#include "glib.h"
+#include "gtk/gtk.h"
 #include "kanban-column.h"
 #include "kanban-window.h"
 #include "utils/kanban-serializer.h"
@@ -55,10 +61,8 @@ KanbanCard* kanban_card_new (void)
                       NULL);
 }
 
-void
-kanban_card_set_title(KanbanCard* Card, const char *title)
-{
-  gtk_editable_set_text (GTK_EDITABLE (Card->LblCardName), title);
+void kanban_card_set_title(KanbanCard *Card, const char *title) {
+  gtk_editable_set_text(GTK_EDITABLE(Card->LblCardName), title);
 }
 
 const gchar*
@@ -196,7 +200,9 @@ delete_clicked(GtkButton* btn, gpointer user_data)
   GtkWidget *old_scrollWnd  = gtk_widget_get_parent(old_view);
   KanbanColumn *old_col     = KANBAN_COLUMN (gtk_widget_get_parent (old_scrollWnd));
 
-  kanban_column_remove_card (old_col, user_data);
+  // Until now, we need a condition to not prompt save if nothing got changed
+  g_object_set(user_data, "needs-saving", 1, NULL);
+  kanban_column_remove_card(old_col, user_data);
 }
 
 static void
@@ -284,12 +290,16 @@ css_drag_prepare (GtkDragSource *source,
 static void
 kanban_card_changed(GtkTextBuffer* buf, gpointer user_data)
 {
-  KanbanCard *self = KANBAN_CARD(user_data);
-  
-  if (!self->needs_saving)
     g_object_set (G_OBJECT(user_data), "needs-saving", 1, NULL);
+}
+
+static void
+kanban_card_title_changed(GtkEditableLabel* label, gpointer user_data)
+{
+  g_object_set(user_data, "needs-saving", 1, NULL);
 
 }
+
 static void
 kanban_card_init (KanbanCard *self)
 {
@@ -304,6 +314,10 @@ kanban_card_init (KanbanCard *self)
   g_signal_connect (source, "prepare", G_CALLBACK (css_drag_prepare), self);
 
   buf = gtk_text_view_get_buffer(self->description);
+  
   self->description_changed = g_signal_connect (buf, "changed", 
                                                 G_CALLBACK(kanban_card_changed), self);
+
+  g_signal_connect(self->LblCardName, "changed", G_CALLBACK(kanban_card_title_changed), self);
+  // Both the description and the title are separate, so we had to implement them independently
 }
