@@ -100,10 +100,10 @@ kanban_application_about_action (GSimpleAction *action,
 	                       "application-name", "Schedule",
 	                       "application-icon", "io.github.zhrexl.thisweekinmylife",
 	                       "developer-name", "zhrexl",
-	                       "version", "0.0.3",
+	                       "version", "0.0.4",
 	                       "developers", developers,
                                "artists", artists,
-	                       "copyright", "© 2023 zhrexl",
+	                       "copyright", "© 2025 zhrexl",
 	                       NULL);
 }
 
