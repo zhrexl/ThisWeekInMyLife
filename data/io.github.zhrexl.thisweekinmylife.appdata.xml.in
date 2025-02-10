@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.zhrexl.thisweekinmylife</id>
   
-  <name>This Week In My Life</name>
+  <name>Schedule</name>
   <summary>This is a kaban styled planner, where the user can insert cards with tasks.</summary>
   
   <metadata_license>CC-BY-4.0</metadata_license>
