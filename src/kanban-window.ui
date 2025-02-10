@@ -4,8 +4,6 @@
   <requires lib="Adw" version="1.2"/>
   <template class="KanbanWindow" parent="AdwApplicationWindow">
     <property name="title" translatable="yes">Schedule</property>
-    <property name="default-width">1200</property>
-    <property name="default-height">700</property>
     <child>
       <object class="AdwToastOverlay" id="toast_overlay">
       <property name="child">

@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="thisweekinmylife">
-	<schema id="io.github.zhrexl.thisweekinmylife" path="/com/github/zhrexl/thisweekinmylife/">
+	<schema id="io.github.zhrexl.thisweekinmylife" path="/io/github/zhrexl/thisweekinmylife/">
+		<key name="font-title" type="s">
+			<default>'Cantarell 14'</default>
+			<summary>Font</summary>
+			<description>A font to be used for the title of the cards.</description>
+		</key>
+		<key name="width" type="i">
+			<default>640</default>
+		</key>
+		<key name="height" type="i">
+			<default>480</default>
+		</key>
+		<key name="is-maximized" type="b">
+			<default>false</default>
+		</key>
+		<key name="is-fullscreen" type="b">
+			<default>false</default>
+		</key>
 	</schema>
 </schemalist>
