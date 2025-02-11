@@ -6,121 +6,142 @@
     <property name="margin-bottom">10</property>
     <property name="activatable">false</property>
     <property name="selectable">false</property>
-    <style>
-      <class name="card"/>
-      <class name="kanbancard"/>
-      <class name="colorbl"/>
-    </style>
+
     <child>
-      <object class="GtkBox">
-      <property name="orientation">vertical</property>
-      <property name="hexpand">true</property>
-      <child>
-        <object class="GtkBox" id="handlerDrag">
-        <property name="orientation">horizontal</property>
+      <object class="GtkBox" id="handlerDrag">
+        <property name="orientation">vertical</property>
         <property name="hexpand">true</property>
-          <child>
-            <object class="GtkEntry" id="LblCardName">
-              <property name="hexpand">true</property>
-              <property name="can-target">false</property>
-              <property name="can-focus">false</property>"
-              <style>
-                  <class name="noback"/>
-              </style>
-            </object>
-          </child>
-          <child>
-            <object class="GtkButton">
-              <property name="halign">end</property>
-              <property name="margin-top">10</property>
-              <property name="margin-bottom">10</property>"
-                  <signal name="clicked" handler="reveal_clicked" object="KanbanCard" swapped="no"/>
-                  <property name="child">
-                  <object class="AdwButtonContent" id="BtnContent">
-                    <property name="icon-name">go-down-symbolic</property>
-                  </object>
-                  </property>
-                  <style>
-                    <class name="flat"/>
-                  </style>
-                </object>
-          </child>
-          <child>
-            <object class="GtkButton">
-              <property name="halign">end</property>
-              <property name="margin-end">5</property>
-              <property name="margin-top">10</property>
-              <property name="margin-bottom">10</property>"
-                  <signal name="clicked" handler="delete_clicked" object="KanbanCard" swapped="no"/>
-                  <property name="child">
-                  <object class="AdwButtonContent">
-                    <property name="icon-name">edit-delete-symbolic</property>
-                  </object>
-                  </property>
-                  <style>
-                    <class name="flat"/>
-                  </style>
-                </object>
-          </child>
-        </object>
-      </child>
-      <child>
-        <object class="GtkRevealer" id="revealercard">
         <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="vexpand-set">true</property>
-            <property name="height-request">150</property>
+          <object class="GtkRevealer" id="drop_revealer">
             <child>
-              <object class="GtkSeparator"></object>
-            </child>
-            <child>
-              <object class="GtkScrolledWindow">
-                <child>
-                  <object class="GtkTextView" id="description">
-                    <property name="vexpand">true</property>
-                    <property name="margin-start">5</property>
-                    <property name="margin-top">5</property>
-                    <property name="margin-end">5</property>
-                    <property name="margin-bottom">5</property>
-                    <property name="wrap-mode">GTK_WRAP_WORD_CHAR</property>
-                    <style>
-                      <class name="noback"/>
-                      <class name="colorbl"/>
-                    </style>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="spacing">5</property>
-                <property name="orientation">horizontal</property>
-                <property name="halign">end</property>
-                <property name="margin-end">5</property>
-                <property name="margin-bottom">5</property>
-                <child>
-                  <object class="GtkButton" id="AddCheckBox">
-                    <property name="icon-name">view-list-symbolic</property>
-                    <style>
-                      <class name="flat"/>
-                    </style>
-                    <signal name="clicked" handler="insert_checkbox" object="description" swapped="no"/>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="ToggleBold">
-                    <property name="visible">false</property>
-                    <property name="icon-name">format-text-bold-symbolic</property>
-                    <signal name="clicked" handler="insert_checkbox" object="description" swapped="no"/>
-                  </object>
-                </child>
+              <object class="AdwBin">
+                <property name="height-request">50</property>
+                <property name="margin-bottom">15</property>
+                <style>
+                  <class name="drop-target"/>
+                  <class name="drop-area"/>
+                </style>
               </object>
             </child>
           </object>
         </child>
-        </object>
-      </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="hexpand">true</property>
+            <style>
+              <class name="card"/>
+              <class name="kanbancard"/>
+              <class name="colorbl"/>
+            </style>
+            <child>
+              <object class="GtkBox">
+              <property name="orientation">horizontal</property>
+              <property name="hexpand">true</property>
+                <child>
+                  <object class="GtkEntry" id="LblCardName">
+                    <property name="hexpand">true</property>
+                    <property name="can-target">false</property>
+                    <property name="can-focus">false</property>"
+                    <style>
+                        <class name="noback"/>
+                    </style>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="halign">end</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>"
+                        <signal name="clicked" handler="reveal_clicked" object="KanbanCard" swapped="no"/>
+                        <property name="child">
+                        <object class="AdwButtonContent" id="BtnContent">
+                          <property name="icon-name">go-down-symbolic</property>
+                        </object>
+                        </property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                      </object>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="halign">end</property>
+                    <property name="margin-end">5</property>
+                    <property name="margin-top">10</property>
+                    <property name="margin-bottom">10</property>"
+                        <signal name="clicked" handler="delete_clicked" object="KanbanCard" swapped="no"/>
+                        <property name="child">
+                        <object class="AdwButtonContent">
+                          <property name="icon-name">edit-delete-symbolic</property>
+                        </object>
+                        </property>
+                        <style>
+                          <class name="flat"/>
+                        </style>
+                      </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkRevealer" id="revealercard">
+              <child>
+                <object class="GtkBox">
+                  <property name="orientation">vertical</property>
+                  <property name="vexpand-set">true</property>
+                  <property name="height-request">150</property>
+                  <child>
+                    <object class="GtkSeparator"></object>
+                  </child>
+                  <child>
+                    <object class="GtkScrolledWindow">
+                      <child>
+                        <object class="GtkTextView" id="description">
+                          <property name="vexpand">true</property>
+                          <property name="margin-start">5</property>
+                          <property name="margin-top">5</property>
+                          <property name="margin-end">5</property>
+                          <property name="margin-bottom">5</property>
+                          <property name="wrap-mode">GTK_WRAP_WORD_CHAR</property>
+                          <style>
+                            <class name="noback"/>
+                            <class name="colorbl"/>
+                          </style>
+                        </object>
+                      </child>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkBox">
+                      <property name="spacing">5</property>
+                      <property name="orientation">horizontal</property>
+                      <property name="halign">end</property>
+                      <property name="margin-end">5</property>
+                      <property name="margin-bottom">5</property>
+                      <child>
+                        <object class="GtkButton" id="AddCheckBox">
+                          <property name="icon-name">view-list-symbolic</property>
+                          <style>
+                            <class name="flat"/>
+                          </style>
+                          <signal name="clicked" handler="insert_checkbox" object="description" swapped="no"/>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkButton" id="ToggleBold">
+                          <property name="visible">false</property>
+                          <property name="icon-name">format-text-bold-symbolic</property>
+                          <signal name="clicked" handler="insert_checkbox" object="description" swapped="no"/>
+                        </object>
+                      </child>
+                    </object>
+                  </child>
+                </object>
+              </child>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </template>
