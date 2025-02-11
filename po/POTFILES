@@ -1,6 +1,16 @@
-data/com.github.zhrexl.kanban.desktop.in
-data/com.github.zhrexl.kanban.appdata.xml.in
-data/com.github.zhrexl.kanban.gschema.xml
+data/io.github.zhrexl.thisweekinmylife.desktop.in
+data/io.github.zhrexl.thisweekinmylife.appdata.xml.in
+data/io.github.zhrexl.thisweekinmylife.gschema.xml
+
+# Fonte C Files with translated strings
 src/main.c
+src/kanban-application.c
+src/kanban-card.c
+src/kanban-column.c
 src/kanban-window.c
+src/utils/kanban-serializer.c
+
+# Interface files (UI) with translated texts
+src/kanban-card.ui
+src/kanban-column.ui
 src/kanban-window.ui

@@ -1,1 +1,1 @@
-i18n.gettext('kanban', preset: 'glib')
+i18n.gettext('thisweekinmylife', preset: 'glib')
