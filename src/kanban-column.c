@@ -50,7 +50,12 @@ KanbanColumn *kanban_column_new(void) {
 static void remove_column(GtkButton *btn, gpointer user_data) {
   g_signal_emit(user_data, SIGNAL_DELETE_COLUMN, 0);
 }
-
+static void kanban_column_set_needs_saving(KanbanColumn *Column, bool needs) {
+  GValue val = G_VALUE_INIT;
+  g_value_init(&val, G_TYPE_BOOLEAN);
+  g_value_set_boolean(&val, needs);
+  g_object_set_property(G_OBJECT(Column),"needs_saving", &val);
+}
 void kanban_column_set_title(KanbanColumn *Column, const char *title) {
   gtk_editable_set_text(GTK_EDITABLE(Column->title), title);
 }
@@ -87,18 +92,35 @@ void kanban_column_get_json(KanbanColumn *Column, gpointer CardObject) {
   json_object_set_object_member((JsonObject *)CardObject, title, object);
 }
 
-static void add_card(KanbanColumn *Column, KanbanCard *card) {
+static void add_card(KanbanColumn *Column, KanbanCard *card){
   gtk_list_box_append(Column->CardsBox, GTK_WIDGET(card));
   Column->Cards = g_list_append(Column->Cards, card);
 }
 
 void kanban_column_add_card(KanbanColumn *Column, gpointer card) {
   add_card(Column, KANBAN_CARD(card));
+  kanban_column_set_needs_saving(Column, true);
+}
+
+void kanban_column_insert_card(KanbanColumn *Column, double y, gpointer card){
+  GtkListBoxRow* row = gtk_list_box_get_row_at_y(Column->CardsBox,y);
+
+  if (row == NULL) {
+    add_card(Column, KANBAN_CARD(card));
+    return;
+  }
+
+  int index = gtk_list_box_row_get_index(row);
+  gtk_list_box_insert(Column->CardsBox, card, index );
+  Column->Cards = g_list_insert(Column->Cards, card, index);
+
+  kanban_column_set_needs_saving(Column, true);
 }
 
 void kanban_column_remove_card(KanbanColumn *Column, gpointer card) {
   gtk_list_box_remove(Column->CardsBox, GTK_WIDGET(card));
   Column->Cards = g_list_remove(Column->Cards, card);
+  kanban_column_set_needs_saving(Column, true);
 }
 
 void kanban_column_add_new_card(KanbanColumn *Column, const gchar *title,
