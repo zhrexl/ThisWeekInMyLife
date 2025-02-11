@@ -4,7 +4,7 @@
 
 .noback:drop(active)
 {
-	border: none;
+	border: blue;
 	box-shadow: none;
 }
 .kanbancard {
@@ -14,5 +14,11 @@
 .colorbl
 {
     color: black;
+}
+
+.drop-target
+{
+    border-radius: 6px;
+    background-color: rgba(252, 228, 134,0.75);
 }
 

@@ -40,6 +40,7 @@ struct _KanbanCard
   GtkBox            *handlerDrag;
   GtkEditableLabel  *LblCardName;
   GtkRevealer       *revealercard;
+  GtkRevealer       *drop_revealer;
   GtkTextView       *description;
   AdwButtonContent  *BtnContent;
   guint              description_changed;
@@ -249,6 +250,8 @@ kanban_card_class_init (KanbanCardClass *klass)
   gtk_widget_class_bind_template_child (widget_class,
                                         KanbanCard, revealercard);
   gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, drop_revealer);
+  gtk_widget_class_bind_template_child (widget_class,
                                         KanbanCard, description);
   gtk_widget_class_bind_template_child (widget_class,
                                         KanbanCard, BtnContent);
@@ -271,22 +274,6 @@ kanban_card_class_init (KanbanCardClass *klass)
   g_object_class_install_property (GClass, 1, needs_saving);
 }
 
-
-static GdkContentProvider *
-css_drag_prepare (GtkDragSource *source,
-                  double         x,
-                  double         y,
-                  GtkWidget     *button)
-{
-  GdkPaintable *paintable;
-
-  paintable = gtk_widget_paintable_new (button);
-  gtk_drag_source_set_icon (source, paintable, 0, 0);
-  g_object_unref (paintable);
-
-  return gdk_content_provider_new_typed (G_TYPE_POINTER, button);
-}
-
 static void
 kanban_card_changed(GtkTextBuffer* buf, gpointer user_data)
 {
@@ -300,10 +287,73 @@ kanban_card_title_changed(GtkEditableLabel* label, gpointer user_data)
 
 }
 
+static GdkContentProvider *
+css_drag_prepare (GtkDragSource *source,
+                  double         x,
+                  double         y,
+                  GtkWidget     *button)
+{
+  GdkPaintable *paintable;
+
+  paintable = gtk_widget_paintable_new (button);
+  gtk_drag_source_set_icon (source, paintable, 0, 0);
+  g_object_unref (paintable);
+
+
+  return gdk_content_provider_new_typed (G_TYPE_POINTER, button);
+}
+
+static void
+  drop_motion_enter (
+    GtkDropControllerMotion* self,
+    gdouble x,
+    gdouble y,
+    gpointer user_data
+  )
+{
+  KanbanCard *card = KANBAN_CARD (user_data);
+  gtk_revealer_set_reveal_child(card->drop_revealer, true);
+}
+
+static void
+  drop_motion_leave (
+    GtkDropControllerMotion* self,
+    gdouble x,
+    gdouble y,
+    gpointer user_data
+  )
+{
+  KanbanCard *card = KANBAN_CARD (user_data);
+  gtk_revealer_set_reveal_child(card->drop_revealer, false);
+}
+
+static void
+on_drag_begin (GtkDragSource *source,
+               GdkDrag       *drag,
+               GtkWidget      *self) {
+  g_object_ref(self);
+  GdkPaintable *paintable, *paintable2;
+
+  paintable = gtk_widget_paintable_new (self);
+  paintable2 = gdk_paintable_get_current_image(paintable);
+
+  gtk_drag_source_set_icon (source, paintable2, 0, 0);
+  g_object_unref (paintable);
+  g_object_unref (paintable2);
+
+  GtkWidget* old_box        = gtk_widget_get_parent (self);
+  GtkWidget* old_view       = gtk_widget_get_parent(old_box);
+  GtkWidget* old_scrollWnd  = gtk_widget_get_parent(old_view);
+  KanbanColumn* old_col     = KANBAN_COLUMN (gtk_widget_get_parent (old_scrollWnd));
+
+  kanban_column_remove_card (old_col, self);
+
+}
 static void
 kanban_card_init (KanbanCard *self)
 {
   GtkDragSource *source;
+  GtkDropControllerMotion *motion = NULL;
   GtkTextBuffer* buf;
 
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -311,7 +361,15 @@ kanban_card_init (KanbanCard *self)
   gtk_widget_add_controller (GTK_WIDGET (self->handlerDrag),
                              GTK_EVENT_CONTROLLER (source));
 
-  g_signal_connect (source, "prepare", G_CALLBACK (css_drag_prepare), self);
+  gtk_drag_source_set_content(source, gdk_content_provider_new_typed (G_TYPE_POINTER, self));
+
+  g_signal_connect (source, "drag-begin", G_CALLBACK (on_drag_begin), self);
+
+  motion = GTK_DROP_CONTROLLER_MOTION(gtk_drop_controller_motion_new());
+  gtk_widget_add_controller (GTK_WIDGET (self->handlerDrag),(GtkEventController*)motion);
+
+  g_signal_connect(motion, "enter", G_CALLBACK (drop_motion_enter), self);
+  g_signal_connect(motion, "leave", G_CALLBACK (drop_motion_leave), self);
 
   buf = gtk_text_view_get_buffer(self->description);
   

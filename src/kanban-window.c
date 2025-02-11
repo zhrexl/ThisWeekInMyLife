@@ -150,7 +150,14 @@ save_before_quit(KanbanWindow* self)
   return TRUE;
 }
 
-
+static void
+remove_column(KanbanColumn* Column, gpointer user_data)
+{
+  KanbanWindow* Window = KANBAN_WINDOW (user_data);
+  Window->ListOfColumns = g_list_remove (Window->ListOfColumns, Column);
+  gtk_box_remove (Window->mainBox, GTK_WIDGET(Column));
+  gtk_widget_set_sensitive (GTK_WIDGET (Window->save), true);
+}
 
 static gboolean
 item_drag_drop (GtkDropTarget *dest,
@@ -163,30 +170,12 @@ item_drag_drop (GtkDropTarget *dest,
 
   GtkWidget* card = (GtkWidget*)g_value_get_pointer(value);
 
-  g_object_ref(card);
-
-  GtkWidget* old_box        = gtk_widget_get_parent (card);
-  GtkWidget* old_view       = gtk_widget_get_parent(old_box);
-  GtkWidget* old_scrollWnd  = gtk_widget_get_parent(old_view);
-  KanbanColumn* old_col     = KANBAN_COLUMN (gtk_widget_get_parent (old_scrollWnd));
-
-  kanban_column_remove_card (old_col, card);
-
   KanbanColumn* col = KANBAN_COLUMN (gtk_event_controller_get_widget (
                                      GTK_EVENT_CONTROLLER (dest)));
-  kanban_column_add_card (col,card);
+  kanban_column_insert_card(col,y,card);
   g_object_unref (card);
 
   return TRUE;
-}
-
-static void
-remove_column(KanbanColumn* Column, gpointer user_data)
-{
-  KanbanWindow* Window = KANBAN_WINDOW (user_data);
-  Window->ListOfColumns = g_list_remove (Window->ListOfColumns, Column);
-  gtk_box_remove (Window->mainBox, GTK_WIDGET(Column));
-  gtk_widget_set_sensitive (GTK_WIDGET (Window->save), true);
 }
 
 GtkWidget*
@@ -197,7 +186,6 @@ create_column(KanbanWindow* Window, const gchar* title)
                                                        GDK_ACTION_COPY);
 
   kanban_column_set_title (column, title);
-
   g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
   g_signal_connect (column, "delete-column", G_CALLBACK (remove_column), Window);
 
