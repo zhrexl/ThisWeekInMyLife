@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: thisweekinmylife\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-11 11:50-0300\n"
-"PO-Revision-Date: 2025-02-14 17:49+0100\n"
+"PO-Revision-Date: 2025-02-14 18:01+0100\n"
 "Last-Translator: Pascal Dietrich <pascal.1.dietrich@hotmail.com>\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -86,7 +86,7 @@ msgstr ""
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:70
 #, fuzzy
 msgid "First release of ThisWeekInMyLife"
-msgstr "Erste Veröffentlichung von Schedule"
+msgstr "Erste Veröffentlichung von Zeitplan"
 
 #: data/io.github.zhrexl.thisweekinmylife.gschema.xml:6
 msgid "Font"
