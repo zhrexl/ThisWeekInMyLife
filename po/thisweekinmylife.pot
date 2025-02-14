@@ -41,7 +41,7 @@ msgstr ""
 msgid ""
 "Schedule is a kanban-styled planner that aims to help you organize your workflow"
 " and keep track of your activities efficiently.\n\n"
-"Easily create and manage your own activities and tasks, drag and drop cards anywhere"
+"Easily create and manage your own activities and tasks, drag and drop cards anywhere,"
 " and implement your own ideas and system of task management with versatility."
 msgstr ""
 
