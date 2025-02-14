@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the thisweekinmylife package.
+# Pascal Dietrich <pascal.1.dietrich@hotmail.com>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: thisweekinmylife\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-02-11 11:50-0300\n"
+"PO-Revision-Date: 2025-02-14 17:49+0100\n"
+"Last-Translator: Pascal Dietrich <pascal.1.dietrich@hotmail.com>\n"
+"Language-Team: German\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Gtranslator 47.1\n"
+"Language: de_DE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: data/io.github.zhrexl.thisweekinmylife.desktop.in:2
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:5
+#: src/kanban-window.ui:6
+#, fuzzy
+msgid "Schedule"
+msgstr "Zeitplan"
+
+#: data/io.github.zhrexl.thisweekinmylife.desktop.in:8
+msgid "Office;Calendar;Todo;"
+msgstr ""
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:6
+msgid ""
+"This is a kaban styled planner, where the user can insert cards with tasks."
+msgstr ""
+"Dies ist ein Kanban-basierter Planer, in dem der Benutzer Karten mit "
+"Aufgaben einfügen kann."
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:11
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:13
+msgid "zhrexl"
+msgstr ""
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:28
+msgid ""
+"This is a kaban styled planner that aims to help you organize your week, the "
+"user can insert cards with tasks. Drag and drop cards between different days."
+msgstr ""
+"Dies ist ein Kanban-basierter Planer, der dir hilft, deine Woche zu "
+"organisieren. Der Benutzer kann Karten mit Aufgaben einfügen und diese per "
+"Drag-and-Drop zwischen verschiedenen Tagen verschieben."
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:46
+msgid "Improved Drag and Drop"
+msgstr "Verbessertes Drag-and-Drop"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:47
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:53
+msgid "Bug Fixes"
+msgstr "Fehlerbehebungen"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:52
+msgid "Remember Window Size"
+msgstr "Fenstergröße merken"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:58
+#, fuzzy
+msgid "New Icon"
+msgstr "Neues Icon"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:59
+msgid "General bug fixes"
+msgstr "Allgemeine Fehlerbehebungen"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:60
+msgid "Improved Performance"
+msgstr "Verbesserte Leistung"
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:65
+msgid "Its now possible to add and remove columns. General bug fixes."
+msgstr ""
+"Es ist jetzt möglich, Spalten hinzuzufügen oder zu löschen. Allgemeine "
+"Fehlerbehebungen."
+
+#: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:70
+#, fuzzy
+msgid "First release of ThisWeekInMyLife"
+msgstr "Erste Veröffentlichung von Schedule"
+
+#: data/io.github.zhrexl.thisweekinmylife.gschema.xml:6
+msgid "Font"
+msgstr "Schriftart"
+
+#: data/io.github.zhrexl.thisweekinmylife.gschema.xml:7
+msgid "A font to be used for the title of the cards."
+msgstr "Die für Kartentitel benutzte Schriftart."
+
+#: src/kanban-window.ui:20
+#, fuzzy
+msgid "Toggle Edit Columns Mode"
+msgstr "Spaltenbearbeitung ein-/ausschalten"
+
+#: src/kanban-window.ui:33
+msgid "Save"
+msgstr "Speichern"
+
+#: src/kanban-window.ui:61
+msgid "_New Column"
+msgstr "_Neue Spalte"
+
+#: src/kanban-window.ui:65
+msgid "_Save"
+msgstr "_Speichern"
+
+#: src/kanban-window.ui:71
+msgid "_Preferences"
+msgstr "_Einstellungen"
+
+#: src/kanban-window.ui:75
+#, fuzzy
+msgid "_About"
+msgstr "_Info zu Zeitplan"
