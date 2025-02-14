@@ -24,12 +24,12 @@ msgid "Schedule"
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.desktop.in:8
-msgid "Office;Calendar;Todo;"
+msgid "Office;Calendar;To Do;"
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:6
 msgid ""
-"This is a kaban styled planner, where the user can insert cards with tasks."
+"A simple kanban-styled planner"
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:11
@@ -39,8 +39,10 @@ msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:28
 msgid ""
-"This is a kaban styled planner that aims to help you organize your week, the "
-"user can insert cards with tasks. Drag and drop cards between different days."
+"Schedule is a kanban-styled planner that aims to help you organize your workflow"
+" and keep track of your activities efficiently.\n\n"
+"Easily create and manage your own activities and tasks, drag and drop cards anywhere"
+" and implement your own ideas and system of task management with versatility."
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:46
