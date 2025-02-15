@@ -5,5 +5,5 @@ Icon=io.github.zhrexl.thisweekinmylife
 Terminal=false
 Type=Application
 Categories=Utility;Office;Calendar;GTK;
-Keywords=Office;Calendar;Todo;
+Keywords=Office;Calendar;To Do;
 StartupNotify=true
