@@ -148,7 +148,7 @@ KanbanUnserializedContent* get_unserialized_buffer(const gchar* description)
     if (title == NULL)
     {
       free(anchor);
-      g_print("Corrupted Filed :(\n");
+      g_print("Corrupted file :(\n");
       break;
     }
 
@@ -160,7 +160,7 @@ KanbanUnserializedContent* get_unserialized_buffer(const gchar* description)
 
     if (!next)
     {
-      g_print("Corrupted json :(\n");
+      g_print("Corrupted JSON :(\n");
       break;
     }
 
