@@ -3,7 +3,7 @@
   <id>io.github.zhrexl.thisweekinmylife</id>
   
   <name>Schedule</name>
-  <summary>This is a kaban styled planner, where the user can insert cards with tasks.</summary>
+  <summary>A simple kanban-styled planner</summary>
   
   <metadata_license>CC-BY-4.0</metadata_license>
   <project_license>AGPL-3.0-or-later</project_license>
@@ -26,7 +26,8 @@
   
   <description>
     <p>
-      This is a kaban styled planner that aims to help you organize your week, the user can insert cards with tasks. Drag and drop cards between different days.
+      Schedule is a kanban-styled planner that aims to help you organize your workflow and keep track of your activities efficiently.<br /><br />
+      Easily create and manage your own activities and tasks, drag and drop cards anywhere, and implement your own ideas and system of task management with versatility.
     </p>
   </description>
   
