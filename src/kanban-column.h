@@ -49,5 +49,7 @@ void
 kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar* description, gboolean revealed);
 
 void kanban_column_insert_card(KanbanColumn *Column, double y, gpointer card);
+
+void kanban_column_content_dropped(KanbanColumn *self);
 G_END_DECLS
 

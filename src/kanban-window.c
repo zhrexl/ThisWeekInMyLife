@@ -172,6 +172,8 @@ item_drag_drop (GtkDropTarget *dest,
 
   KanbanColumn* col = KANBAN_COLUMN (gtk_event_controller_get_widget (
                                      GTK_EVENT_CONTROLLER (dest)));
+
+  kanban_column_content_dropped(col);
   kanban_column_insert_card(col,y,card);
   g_object_unref (card);
 

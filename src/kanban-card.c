@@ -110,6 +110,10 @@ kanban_card_get_description(KanbanCard* Card)
   return get_serialized_buffer (Buffer);
 }
 
+void kanban_card_content_dropped(KanbanCard* self) {
+  gtk_revealer_set_reveal_child(self->drop_revealer, false);
+}
+
 static void
 create_task(GtkTextView* text_view, GtkTextIter* iter, const gchar* title, gboolean active)
 {
@@ -349,6 +353,8 @@ on_drag_begin (GtkDragSource *source,
   kanban_column_remove_card (old_col, self);
 
 }
+
+
 static void
 kanban_card_init (KanbanCard *self)
 {
