@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include "kanban-window.h"
+#include "kanban-application.h"
 #include "kanban-column.h"
 #include "json-glib/json-glib.h"
 
@@ -91,6 +92,7 @@ save_cards(gpointer user_data)
   adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new ("Saved"));
 
   gtk_widget_set_sensitive (GTK_WIDGET (wnd->save), false);
+  SaveNeeded = false;
   g_free(file_path);
   g_free (data);
 
@@ -108,7 +110,10 @@ response (AdwMessageDialog* self, gchar* response, gpointer user_data)
     return;
 
   if (strstr (response, "save"))
+  {
     save_cards (user_data);
+    SaveNeeded = false;
+  }
 
   GApplication* app = G_APPLICATION (gtk_window_get_application (GTK_WINDOW (user_data)));
   g_application_quit (app);
@@ -310,6 +315,7 @@ load_ui(KanbanWindow* self)
 
   g_free(file_path);
 
+  IsInitialized = true;
   return FALSE;
 }
 

@@ -27,6 +27,7 @@
 #include "glib-object.h"
 #include "glib.h"
 #include "gtk/gtk.h"
+#include "kanban-application.h"
 #include "kanban-column.h"
 #include "kanban-window.h"
 #include "utils/kanban-serializer.h"
@@ -205,8 +206,8 @@ delete_clicked(GtkButton* btn, gpointer user_data)
   GtkWidget *old_scrollWnd  = gtk_widget_get_parent(old_view);
   KanbanColumn *old_col     = KANBAN_COLUMN (gtk_widget_get_parent (old_scrollWnd));
 
-  // Until now, we need a condition to not prompt save if nothing got changed
   g_object_set(user_data, "needs-saving", 1, NULL);
+  SaveNeeded = true;
   kanban_column_remove_card(old_col, user_data);
 }
 
@@ -282,13 +283,18 @@ static void
 kanban_card_changed(GtkTextBuffer* buf, gpointer user_data)
 {
     g_object_set (G_OBJECT(user_data), "needs-saving", 1, NULL);
+    if (IsInitialized) {
+      SaveNeeded = true;
+    }
 }
 
 static void
 kanban_card_title_changed(GtkEditableLabel* label, gpointer user_data)
 {
   g_object_set(user_data, "needs-saving", 1, NULL);
-
+  if (IsInitialized) {
+    SaveNeeded = true;
+  }
 }
 
 static GdkContentProvider *

@@ -21,6 +21,7 @@
 #include "kanban-column.h"
 #include "config.h"
 #include "gtk/gtk.h"
+#include "kanban-application.h"
 #include "kanban-card.h"
 #include <json-glib/json-glib.h>
 
@@ -229,6 +230,9 @@ static void kanban_column_class_init(KanbanColumnClass *klass) {
 }
 static void title_changed(GtkEditableLabel *label, gpointer user_data) {
   g_object_set(user_data, "needs-saving", 1, NULL);
+  if (IsInitialized) {
+    SaveNeeded = true;
+  }
 }
 
 static void kanban_column_init(KanbanColumn *self) {
