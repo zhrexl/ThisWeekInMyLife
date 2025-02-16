@@ -2,7 +2,7 @@
 
  ![app-banner](https://user-images.githubusercontent.com/91388039/233837273-3a942cea-cdc4-48df-b595-cd2c6584d003.png)
  
-Also as known as *ThisWeekInMyLife* in Flathub, a kanban-styled planner that aims to help you organize your week! The user can insert cards with tasks and notes. Drag and drop cards between different columns that can be added, switch orders and hide or expand contents of cards. You can even edit column names so they're not just about weekdays!  
+Also known as *ThisWeekInMyLife* in Flathub, a kanban-styled planner that aims to help you organize your week! The user can insert cards with tasks and notes. Drag and drop cards between different columns that can be added, switch orders and hide or expand contents of cards. You can even edit column names so they're not just about weekdays!  
 
 This project is currently under heavy and early development, so any contribution is highly welcome.
 
