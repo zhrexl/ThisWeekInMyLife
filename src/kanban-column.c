@@ -27,6 +27,7 @@
 static GParamSpec *needs_saving = NULL;
 static GParamSpec *edit_mode = NULL;
 static guint SIGNAL_DELETE_COLUMN = 0;
+static guint SIGNAL_CONTENT_DROPPED = 1;
 
 struct _KanbanColumn {
   GtkBox parent_instance;
@@ -58,6 +59,20 @@ static void kanban_column_set_needs_saving(KanbanColumn *Column, bool needs) {
 }
 void kanban_column_set_title(KanbanColumn *Column, const char *title) {
   gtk_editable_set_text(GTK_EDITABLE(Column->title), title);
+}
+
+void kanban_column_content_dropped(KanbanColumn *self) {
+  g_signal_emit(self, SIGNAL_CONTENT_DROPPED, 0);
+}
+
+// This is related to issue #31
+static void kanban_column_content_dropped_callback(KanbanColumn *self) {
+  KanbanCard *item;
+  for (GList *elem = self->Cards; elem; elem = elem->next) {
+    item = elem->data;
+    kanban_card_content_dropped(item);
+  }
+
 }
 
 GtkListBox *kanban_column_get_cards_box(KanbanColumn *Column) {
@@ -206,6 +221,11 @@ static void kanban_column_class_init(KanbanColumnClass *klass) {
       g_signal_new("delete-column", G_TYPE_FROM_CLASS(klass),
                    G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
                    0, NULL, NULL, NULL, G_TYPE_NONE, 0);
+
+  SIGNAL_CONTENT_DROPPED =
+    g_signal_new("content-dropped", G_TYPE_FROM_CLASS(klass),
+                 G_SIGNAL_RUN_LAST | G_SIGNAL_NO_RECURSE | G_SIGNAL_NO_HOOKS,
+                 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 }
 static void title_changed(GtkEditableLabel *label, gpointer user_data) {
   g_object_set(user_data, "needs-saving", 1, NULL);
@@ -219,4 +239,6 @@ static void kanban_column_init(KanbanColumn *self) {
   g_object_bind_property(self, "edit-mode", self->Revealer, "reveal-child",
                          G_BINDING_BIDIRECTIONAL);
   g_signal_connect(self->title, "changed", G_CALLBACK(title_changed), self);
+
+  g_signal_connect(self, "content-dropped",  G_CALLBACK(kanban_column_content_dropped_callback), self);
 }
