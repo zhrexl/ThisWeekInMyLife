@@ -24,6 +24,8 @@
 
 G_BEGIN_DECLS
 
+extern bool SaveNeeded, IsInitialized;
+
 #define KANBAN_TYPE_APPLICATION (kanban_application_get_type())
 
 G_DECLARE_FINAL_TYPE (KanbanApplication, kanban_application, KANBAN, APPLICATION, AdwApplication)
