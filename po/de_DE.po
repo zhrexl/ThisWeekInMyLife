@@ -27,15 +27,18 @@ msgid "Schedule"
 msgstr "Zeitplan"
 
 #: data/io.github.zhrexl.thisweekinmylife.desktop.in:8
-msgid "Office;Calendar;Todo;"
+msgid "Office;Calendar;To Do;"
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:6
 msgid ""
-"This is a kaban styled planner, where the user can insert cards with tasks."
+"Schedule is a kanban-styled planner that aims to help you organize your workflow"
+" and keep track of your activities efficiently.\n\n"
+"Easily create and manage your own activities and tasks, drag and drop cards anywhere,"
+" and implement your own ideas and system of task management with versatility."
 msgstr ""
-"Dies ist ein Kanban-basierter Planer, in dem der Benutzer Karten mit "
-"Aufgaben einfügen kann."
+"Zeitplan ist ein Kanban-basierter Planer, der das Ziel hat, Ihnen bei der Organisation ihrer Arbeitsabläufe zu helfen und den Überblick über alle Aktivitäten zu behalten.\n\n"
+"Erstellen und verwalten Sie ganz einfach Ihre Aktivitäten und Aufgaben, verschieben Sie ihre Karten überallhin und setzten Sie Ihre eigenen Ideen und Ihr eigenes System zur Aufgabenverwaltung flexibel um."
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:11
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:13
@@ -43,13 +46,8 @@ msgid "zhrexl"
 msgstr ""
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:28
-msgid ""
-"This is a kaban styled planner that aims to help you organize your week, the "
-"user can insert cards with tasks. Drag and drop cards between different days."
-msgstr ""
-"Dies ist ein Kanban-basierter Planer, der dir hilft, deine Woche zu "
-"organisieren. Der Benutzer kann Karten mit Aufgaben einfügen und diese per "
-"Drag-and-Drop zwischen verschiedenen Tagen verschieben."
+msgid "A simple kanban-styled planner"
+msgstr "Ein einfacher Kanban-basierter Planer"
 
 #: data/io.github.zhrexl.thisweekinmylife.appdata.xml.in:46
 msgid "Improved Drag and Drop"
