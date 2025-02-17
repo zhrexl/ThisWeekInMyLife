@@ -42,12 +42,17 @@
   </screenshots>
   
   <releases>
+    <release version="0.0.6" date="2025-02-17">
+            <description>
+              <p> Bug Fixes </p>
+            </description>
+    </release>
     <release version="0.0.5" date="2025-02-11">
           <description>
             <p> Improved Drag and Drop </p>
             <p> Bug Fixes </p>
           </description>
-      </release>
+    </release>
     <release version="0.0.4" date="2025-02-10">
         <description>
           <p> Remember Window Size </p>
