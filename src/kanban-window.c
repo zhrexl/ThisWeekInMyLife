@@ -18,9 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
 #include "kanban-window.h"
+
+#include <glib/gi18n.h>
+
 #include "kanban-application.h"
 #include "kanban-column.h"
 #include "json-glib/json-glib.h"
@@ -50,73 +51,75 @@ save_cards(gpointer user_data)
   JsonGenerator *generator;
   JsonNode *root;
   JsonObject *CardObject;
-
   KanbanColumn *item;
-  KanbanWindow* wnd = KANBAN_WINDOW (user_data);
-
-  gchar *data;
+  KanbanWindow* wnd;
+  gchar *data = NULL;
+  gchar *file_path = NULL;
   gsize len;
+  gboolean success = FALSE;
 
-  generator    = json_generator_new ();
-  root         = json_node_new (JSON_NODE_OBJECT);
-  CardObject   = json_object_new ();
+  g_return_val_if_fail(KANBAN_IS_WINDOW(user_data), FALSE);
+  
+  wnd = KANBAN_WINDOW(user_data);
+  generator = json_generator_new();
+  root = json_node_new(JSON_NODE_OBJECT);
+  CardObject = json_object_new();
 
   for(GList* elem = wnd->ListOfColumns; elem; elem = elem->next) {
     item = elem->data;
     kanban_column_get_json(item, CardObject);
   }
 
-  json_node_take_object (root, CardObject);
-  json_generator_set_root (generator, root);
-
-  g_object_set (generator, "pretty", FALSE, NULL);
-  data = json_generator_to_data (generator, &len);
-
-  //g_print("checking nested object %s",data);
-  const gchar* home_dir = g_get_home_dir ();
-
-  // TODO: file_path should be a global file
-  gchar* file_path = g_strdup_printf ("%s/%s", home_dir, FileName);
+  json_node_take_object(root, CardObject);
+  json_generator_set_root(generator, root);
+  g_object_set(generator, "pretty", FALSE, NULL);
+  
+  data = json_generator_to_data(generator, &len);
+  file_path = g_build_filename(g_get_home_dir(), FileName, NULL);
 
   GError* error = NULL;
-  g_file_set_contents (file_path, data, -1, &error);
-  if (error != NULL) {
-    gchar* msg = g_strdup_printf ("Error saving file: %s\n", error->message);
-    g_printerr ("%s", msg);
-    adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new (msg));
+  if (!g_file_set_contents(file_path, data, -1, &error)) {
+    gchar* msg = g_strdup_printf("Error saving file: %s\n", error->message);
+    g_printerr("%s", msg);
+    adw_toast_overlay_add_toast(wnd->toast_overlay, adw_toast_new(msg));
     g_free(msg);
-    g_error_free (error);
-    return 1;
+    g_error_free(error);
+    goto cleanup;
   }
 
-  adw_toast_overlay_add_toast (wnd->toast_overlay, adw_toast_new ("Saved"));
+  adw_toast_overlay_add_toast(wnd->toast_overlay, adw_toast_new("Saved"));
+  gtk_widget_set_sensitive(GTK_WIDGET(wnd->save), FALSE);
+  SaveNeeded = FALSE;
+  success = TRUE;
 
-  gtk_widget_set_sensitive (GTK_WIDGET (wnd->save), false);
-  SaveNeeded = false;
+cleanup:
   g_free(file_path);
-  g_free (data);
+  g_free(data);
+  json_node_free(root);
+  g_object_unref(generator);
 
-  json_node_free (root);
-  g_object_unref (generator);
-
-  return TRUE;
+  return success; 
 }
 
 
 static void
-response (AdwMessageDialog* self, gchar* response, gpointer user_data)
+response(AdwDialog* self, const char* response, gpointer user_data)
 {
-  if (strstr(response, "cancel"))
+  g_return_if_fail(ADW_IS_DIALOG(self));
+  g_return_if_fail(response != NULL);
+  g_return_if_fail(KANBAN_IS_WINDOW(user_data));
+
+  if (g_strcmp0(response, "cancel") == 0)
     return;
 
-  if (strstr (response, "save"))
+  if (g_strcmp0(response, "save") == 0)
   {
-    save_cards (user_data);
-    SaveNeeded = false;
+    save_cards(user_data);
+    SaveNeeded = FALSE;
   }
 
-  GApplication* app = G_APPLICATION (gtk_window_get_application (GTK_WINDOW (user_data)));
-  g_application_quit (app);
+  GApplication* app = G_APPLICATION(gtk_window_get_application(GTK_WINDOW(user_data)));
+  g_application_quit(app);
 }
 
 
@@ -124,33 +127,33 @@ response (AdwMessageDialog* self, gchar* response, gpointer user_data)
 static gboolean
 save_before_quit(KanbanWindow* self)
 {
+  g_return_val_if_fail(KANBAN_IS_WINDOW(self), FALSE);
+  
   gboolean sensitive = gtk_widget_get_sensitive(GTK_WIDGET(self->save));
 
-  if(!sensitive)
-    return false;
+  if (!sensitive)
+    return FALSE;
 
-  GtkWidget *dialog;
+  AdwDialog *dialog;
 
-  dialog = adw_message_dialog_new (GTK_WINDOW(self), ("Save Changes?"), NULL);
+  dialog = ADW_DIALOG(adw_alert_dialog_new(_("Save Changes?"),
+                                         _("Open document contains unsaved changes. Changes which are not saved will be permanently lost.")));
 
-  adw_message_dialog_format_body (ADW_MESSAGE_DIALOG (dialog),
-                                ("Open document contains unsaved changes. Changes which are not saved will be permanently lost."));
+  adw_alert_dialog_add_responses(ADW_ALERT_DIALOG(dialog),
+                               "cancel", _("_Cancel"),
+                               "discard", _("_Discard"),
+                               "save", _("_Save & Quit"),
+                               NULL);
 
-  adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG (dialog),
-                                  "cancel",  ("_Cancel"),
-                                  "discard",  ("_Discard"),
-                                  "save", ("_Save & Quit"),
-                                  NULL);
+  adw_alert_dialog_set_response_appearance(ADW_ALERT_DIALOG(dialog), "discard", ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_response_appearance(ADW_ALERT_DIALOG(dialog), "save", ADW_RESPONSE_SUGGESTED);
 
-  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "discard", ADW_RESPONSE_DESTRUCTIVE);
-  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "save", ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response(ADW_ALERT_DIALOG(dialog), "cancel");
+  adw_alert_dialog_set_close_response(ADW_ALERT_DIALOG(dialog), "cancel");
 
-  adw_message_dialog_set_default_response (ADW_MESSAGE_DIALOG (dialog), "cancel");
-  adw_message_dialog_set_close_response (ADW_MESSAGE_DIALOG (dialog), "cancel");
+  g_signal_connect(dialog, "response", G_CALLBACK(response), self);
 
-  g_signal_connect (dialog, "response", G_CALLBACK (response), self);
-
-  gtk_window_present (GTK_WINDOW (dialog));
+  adw_dialog_present(dialog, GTK_WIDGET(self));
 
   return TRUE;
 }
@@ -188,24 +191,45 @@ item_drag_drop (GtkDropTarget *dest,
 GtkWidget*
 create_column(KanbanWindow* Window, const gchar* title)
 {
-  KanbanColumn*   column      = kanban_column_new ();
-  GtkDropTarget*  target      = gtk_drop_target_new (G_TYPE_POINTER,
-                                                       GDK_ACTION_COPY);
+  g_return_val_if_fail(KANBAN_IS_WINDOW(Window), NULL);
+  g_return_val_if_fail(title != NULL, NULL);
 
-  kanban_column_set_title (column, title);
-  g_signal_connect (target, "drop", G_CALLBACK (item_drag_drop), NULL);
-  g_signal_connect (column, "delete-column", G_CALLBACK (remove_column), Window);
+  KanbanColumn* column = kanban_column_new();
+  if (!column) {
+    g_warning("Failed to create new KanbanColumn");
+    return NULL;
+  }
 
-  g_object_bind_property (column, "needs-saving", Window->save, "sensitive", G_BINDING_BIDIRECTIONAL);
-  g_object_bind_property (column, "edit-mode", Window->EditBtn, "active", G_BINDING_BIDIRECTIONAL);
-  g_object_set(column, "needs-saving", 0, NULL);
+  GtkDropTarget* target = gtk_drop_target_new(G_TYPE_POINTER, GDK_ACTION_COPY);
+  if (!target) {
+    g_warning("Failed to create drop target");
+    g_object_unref(column);
+    return NULL;
+  }
 
-  gtk_widget_add_controller ( GTK_WIDGET (column),
-                              GTK_EVENT_CONTROLLER (target));
+  kanban_column_set_title(column, title);
+  
+  if (!g_signal_connect(target, "drop", G_CALLBACK(item_drag_drop), NULL)) {
+    g_warning("Failed to connect drop signal");
+    g_object_unref(target);
+    g_object_unref(column);
+    return NULL;
+  }
 
-  gtk_box_append (Window->mainBox, GTK_WIDGET (column));
+  if (!g_signal_connect(column, "delete-column", G_CALLBACK(remove_column), Window)) {
+    g_warning("Failed to connect delete-column signal");
+    g_object_unref(target);
+    g_object_unref(column);
+    return NULL;
+  }
 
-  Window->ListOfColumns = g_list_append (Window->ListOfColumns, column);
+  g_object_bind_property(column, "needs-saving", Window->save, "sensitive", G_BINDING_BIDIRECTIONAL);
+  g_object_bind_property(column, "edit-mode", Window->EditBtn, "active", G_BINDING_BIDIRECTIONAL);
+  g_object_set(column, "needs-saving", FALSE, NULL);
+
+  gtk_widget_add_controller(GTK_WIDGET(column), GTK_EVENT_CONTROLLER(target));
+  gtk_box_append(Window->mainBox, GTK_WIDGET(column));
+  Window->ListOfColumns = g_list_append(Window->ListOfColumns, column);
 
   return GTK_WIDGET(column);
 }
@@ -240,7 +264,7 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 
     const gchar*  description = json_object_get_string_member (objmember,
                                                               "description");
-    gboolean revealed = json_object_get_int_member (objmember, "revealed");
+    gboolean revealed = json_object_get_boolean_member (objmember, "revealed");
 
     kanban_column_add_new_card (Column, objectname, description, revealed);
   }
@@ -250,98 +274,149 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
 
 
 static
-int loadjson (KanbanWindow* self, gchar* file_path)
+int loadjson(KanbanWindow* self, const gchar* file_path)
 {
-  JsonParser* parser = json_parser_new ();
+  g_return_val_if_fail(KANBAN_IS_WINDOW(self), 1);
+  g_return_val_if_fail(file_path != NULL, 1);
+
+  JsonParser* parser = json_parser_new();
+  if (!parser) {
+    g_warning("Failed to create JSON parser");
+    return 1;
+  }
+
+  if (!g_file_test(file_path, G_FILE_TEST_EXISTS)) {
+    g_message("No JSON file was found! Creating a new one...");
+    g_object_unref(parser);
+    return 1;
+  }
+
   GError* error = NULL;
-
-  if(!g_file_test (file_path, G_FILE_TEST_EXISTS))
-  {
-    g_print("No Json was found! Creating a new one...\n");
-    return 1;
-  }
   if (!json_parser_load_from_file(parser, file_path, &error)) {
-    g_printerr ("Error parsing JSON: %s\n", error->message);
-    g_error_free (error);
-    g_object_unref (parser);
+    g_warning("Error parsing JSON: %s", error->message);
+    g_error_free(error);
+    g_object_unref(parser);
     return 1;
   }
 
-  JsonNode* root = json_parser_get_root (parser);
-  if (json_node_get_node_type (root) != JSON_NODE_OBJECT) {
-    g_printerr ("JSON root is not an object\n");
-    g_object_unref (parser);
+  JsonNode* root = json_parser_get_root(parser);
+  if (!root || json_node_get_node_type(root) != JSON_NODE_OBJECT) {
+    g_warning("JSON root is not an object");
+    g_object_unref(parser);
     return 1;
   }
 
-  JsonObject* object = json_node_get_object (root);
-
-  GList* objects = json_object_get_members (object);
-
-  if(!g_list_length (objects))
+  JsonObject* object = json_node_get_object(root);
+  if (!object) {
+    g_warning("Failed to get JSON object from root node");
+    g_object_unref(parser);
     return 1;
-
-  for (GList* child = objects; child != NULL; child = child->next)
-  {
-    const char*     object_name = child->data;
-    KanbanColumn*   column      = KANBAN_COLUMN(create_column (self, object_name));
-
-    JsonNode* node = json_object_get_member (object, object_name);
-    create_cards_from_json (column, node);
   }
 
-  g_list_free (objects);
-  g_object_unref (parser);
+  GList* objects = json_object_get_members(object);
+  if (!objects) {
+    g_message("No columns found in JSON");
+    g_object_unref(parser);
+    return 1;
+  }
+
+  for (GList* child = objects; child != NULL; child = child->next) {
+    const char* object_name = child->data;
+    if (!object_name) {
+      g_warning("Invalid column name in JSON");
+      continue;
+    }
+
+    KanbanColumn* column = KANBAN_COLUMN(create_column(self, object_name));
+    if (!column) {
+      g_warning("Failed to create column: %s", object_name);
+      continue;
+    }
+
+    JsonNode* node = json_object_get_member(object, object_name);
+    if (node) {
+      create_cards_from_json(column, node);
+    }
+  }
+
+  g_list_free(objects);
+  g_object_unref(parser);
   return 0;
 }
 
 static gboolean
 load_ui(KanbanWindow* self)
 {
-  const char* Weekdays[] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+  g_return_val_if_fail(KANBAN_IS_WINDOW(self), TRUE);
+
+  static const char* Weekdays[] = {
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    NULL
+  };
 
   /* Restore json */
-  const gchar* home_dir = g_get_home_dir ();
-  gchar* file_path      = g_strdup_printf ("%s/%s",
-                                           home_dir, FileName);
+  const gchar* home_dir = g_get_home_dir();
+  if (!home_dir) {
+    g_warning("Failed to get home directory");
+    return TRUE;
+  }
 
-  if (loadjson (self, file_path))
-  {
-    for (int i = 0; i < 5; i++)
-    {
-      create_column(self, Weekdays[i]);
+  gchar* file_path = g_build_filename(home_dir, FileName, NULL);
+  if (!file_path) {
+    g_warning("Failed to build file path");
+    return TRUE;
+  }
+
+  if (loadjson(self, file_path)) {
+    for (const char** day = Weekdays; *day != NULL; day++) {
+      if (!create_column(self, *day)) {
+        g_warning("Failed to create column for %s", *day);
+      }
     }
   }
 
   g_free(file_path);
-
-  IsInitialized = true;
-  return FALSE;
+  IsInitialized = TRUE;
+  return FALSE; /* Don't call again */
 }
 
 static void
-kanban_window_init (KanbanWindow *self)
+kanban_window_init(KanbanWindow *self)
 {
+  g_return_if_fail(KANBAN_IS_WINDOW(self));
 
-  gtk_widget_init_template (GTK_WIDGET (self));
+  gtk_widget_init_template(GTK_WIDGET(self));
 
-  g_idle_add ((GSourceFunc)load_ui, self);
+  if (!g_idle_add((GSourceFunc)load_ui, self)) {
+    g_warning("Failed to add load_ui to idle queue");
+  }
 
-  g_signal_connect(self, "close-request", G_CALLBACK(save_before_quit), NULL);
+  if (!g_signal_connect(self, "close-request", G_CALLBACK(save_before_quit), NULL)) {
+    g_warning("Failed to connect close-request signal");
+  }
 
-  GSettings *settings = g_settings_new ("io.github.zhrexl.thisweekinmylife");
+  GSettings *settings = g_settings_new("io.github.zhrexl.thisweekinmylife");
+  if (!settings) {
+    g_warning("Failed to create settings");
+    return;
+  }
 
-  g_settings_bind (settings, "width",
-                   self, "default-width",
-                   G_SETTINGS_BIND_DEFAULT);
-  g_settings_bind (settings, "height",
-                   self, "default-height",
-                    G_SETTINGS_BIND_DEFAULT);
-  g_settings_bind (settings, "is-maximized",
-                   self, "maximized",
-                   G_SETTINGS_BIND_DEFAULT);
-  g_settings_bind (settings, "is-fullscreen",
-                   self, "fullscreened",
-                   G_SETTINGS_BIND_DEFAULT);
+  g_settings_bind(settings, "width",
+                  self, "default-width",
+                  G_SETTINGS_BIND_DEFAULT);
+  g_settings_bind(settings, "height",
+                  self, "default-height",
+                  G_SETTINGS_BIND_DEFAULT);
+  g_settings_bind(settings, "is-maximized",
+                  self, "maximized",
+                  G_SETTINGS_BIND_DEFAULT);
+  g_settings_bind(settings, "is-fullscreen",
+                  self, "fullscreened",
+                  G_SETTINGS_BIND_DEFAULT);
 
+  g_object_unref(settings);
 }
