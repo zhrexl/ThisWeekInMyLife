@@ -165,6 +165,7 @@ static void add_card_clicked(GtkButton *btn, gpointer user_data) {
   g_object_bind_property(Column, "needs-saving", card, "needs-saving",
                          G_BINDING_BIDIRECTIONAL);
   add_card(Column, card);
+  kanban_card_set_reveal(card, true);
 }
 
 static void kanban_get_property(GObject *object, guint property_id,
