@@ -50,4 +50,10 @@ void kanban_card_content_dropped(KanbanCard* self);
 void
 kanban_card_set_description(KanbanCard* Card,const gchar* description);
 
+gint
+kanban_card_get_description_height(KanbanCard* Card);
+
+void
+kanban_card_set_description_height(KanbanCard* Card, gint height);
+
 G_END_DECLS
