@@ -97,6 +97,8 @@ void kanban_column_get_json(KanbanColumn *Column, gpointer CardObject) {
       json_object_set_string_member(nested, "description", description);
       json_object_set_int_member(nested, "revealed",
                                  kanban_card_get_reveal(item));
+      json_object_set_int_member(nested, "description_height",
+                                 kanban_card_get_description_height(item));
       json_object_set_object_member(object, kanban_card_get_title(item),
                                     nested);
 
@@ -139,13 +141,19 @@ void kanban_column_remove_card(KanbanColumn *Column, gpointer card) {
   kanban_column_set_needs_saving(Column, true);
 }
 
-void kanban_column_add_new_card(KanbanColumn *Column, const gchar *title,
-                                const gchar *description, gboolean revealed) {
+void
+kanban_column_add_new_card (KanbanColumn *Column,
+                            const gchar  *title,
+                            const gchar  *description,
+                            gboolean      revealed,
+                            gint          description_height)
+{
   KanbanCard *card = kanban_card_new();
 
   kanban_card_set_title(card, title);
   kanban_card_set_description(card, description);
   kanban_card_set_reveal(card, revealed);
+  kanban_card_set_description_height(card, description_height);
 
   add_card(Column, card);
 

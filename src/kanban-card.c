@@ -42,10 +42,14 @@ struct _KanbanCard
   GtkEditableLabel  *LblCardName;
   GtkRevealer       *revealercard;
   GtkRevealer       *drop_revealer;
+  GtkBox            *revealContent;
+  GtkWidget         *resizeHandle;
   GtkTextView       *description;
   AdwButtonContent  *BtnContent;
   guint              description_changed;
   gboolean           needs_saving;
+  gint               drag_start_height;
+  gdouble            drag_start_y_stable;
 };
 
 const gchar checktemplate[] = "<task status=";
@@ -101,6 +105,21 @@ kanban_card_set_reveal(KanbanCard* card, gboolean revealed)
   }
 
   gtk_revealer_set_reveal_child (card->revealercard, revealed);
+}
+
+gint
+kanban_card_get_description_height(KanbanCard* Card)
+{
+  int width, height;
+  gtk_widget_get_size_request (GTK_WIDGET (Card->revealContent), &width, &height);
+  return height;
+}
+
+void
+kanban_card_set_description_height(KanbanCard* Card, gint height)
+{
+  height = CLAMP (height, KANBAN_CARD_MIN_CONTENT_HEIGHT, KANBAN_CARD_MAX_CONTENT_HEIGHT);
+  gtk_widget_set_size_request (GTK_WIDGET (Card->revealContent), -1, height);
 }
 
 /* the user must unref the returned pointer with g_bytes_unref() */
@@ -260,6 +279,10 @@ kanban_card_class_init (KanbanCardClass *klass)
                                         KanbanCard, description);
   gtk_widget_class_bind_template_child (widget_class,
                                         KanbanCard, BtnContent);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, revealContent);
+  gtk_widget_class_bind_template_child (widget_class,
+                                        KanbanCard, resizeHandle);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (klass),
                                            reveal_clicked);
@@ -362,10 +385,71 @@ on_drag_begin (GtkDragSource *source,
 
 
 static void
+resize_drag_begin (GtkGestureDrag *gesture,
+                    gdouble         start_x,
+                    gdouble         start_y,
+                    gpointer        user_data)
+{
+  KanbanCard *self = KANBAN_CARD (user_data);
+  graphene_point_t start_point, stable_point;
+
+  /* Prevents the ancestor GtkDragSource from grabbing this drag. */
+  gtk_gesture_set_state (GTK_GESTURE (gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+
+  self->drag_start_height = kanban_card_get_description_height (self);
+
+  /* Use card coordinates, not resizeHandle's - the handle moves as we
+   * resize, which would make the reference point oscillate. */
+  graphene_point_init (&start_point, start_x, start_y);
+
+  /* resizeHandle is always a template child of self, so they always share
+   * an ancestor; failure here would mean the widget tree is broken. */
+  g_return_if_fail (gtk_widget_compute_point (self->resizeHandle, GTK_WIDGET (self),
+                                               &start_point, &stable_point));
+  self->drag_start_y_stable = stable_point.y;
+}
+
+static void
+resize_drag_update (GtkGestureDrag *gesture,
+                     gdouble         offset_x,
+                     gdouble         offset_y,
+                     gpointer        user_data)
+{
+  KanbanCard *self = KANBAN_CARD (user_data);
+  gdouble start_x, start_y;
+  graphene_point_t cur_point, cur_point_stable;
+
+  gtk_gesture_drag_get_start_point (gesture, &start_x, &start_y);
+
+  /* Translate to the same card coordinates as drag_start_y_stable. */
+  graphene_point_init (&cur_point, start_x + offset_x, start_y + offset_y);
+  g_return_if_fail (gtk_widget_compute_point (self->resizeHandle, GTK_WIDGET (self),
+                                               &cur_point, &cur_point_stable));
+
+  kanban_card_set_description_height (self,
+      self->drag_start_height + (gint) (cur_point_stable.y - self->drag_start_y_stable));
+}
+
+static void
+resize_drag_end (GtkGestureDrag *gesture,
+                  gdouble         offset_x,
+                  gdouble         offset_y,
+                  gpointer        user_data)
+{
+  KanbanCard *self = KANBAN_CARD (user_data);
+
+  g_object_set (self, "needs-saving", 1, NULL);
+  if (IsInitialized) {
+    SaveNeeded = true;
+  }
+}
+
+static void
 kanban_card_init (KanbanCard *self)
 {
   GtkDragSource *source;
   GtkDropControllerMotion *motion = NULL;
+  GtkGestureDrag *resize_gesture;
   GtkTextBuffer* buf;
 
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -390,4 +474,13 @@ kanban_card_init (KanbanCard *self)
 
   g_signal_connect(self->LblCardName, "changed", G_CALLBACK(kanban_card_title_changed), self);
   // Both the description and the title are separate, so we had to implement them independently
+
+  resize_gesture = GTK_GESTURE_DRAG (gtk_gesture_drag_new ());
+  gtk_widget_add_controller (self->resizeHandle,
+                             GTK_EVENT_CONTROLLER (resize_gesture));
+  g_signal_connect (resize_gesture, "drag-begin", G_CALLBACK (resize_drag_begin), self);
+  g_signal_connect (resize_gesture, "drag-update", G_CALLBACK (resize_drag_update), self);
+  g_signal_connect (resize_gesture, "drag-end", G_CALLBACK (resize_drag_end), self);
+
+  gtk_widget_set_cursor_from_name (self->resizeHandle, "ns-resize");
 }

@@ -22,3 +22,16 @@
     background-color: rgba(252, 228, 134,0.75);
 }
 
+.resize-handle
+{
+    min-width: 64px;
+    margin-bottom: 4px;
+    border-radius: 3px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.resize-handle:hover
+{
+    background-color: rgba(0, 0, 0, 0.4);
+}
+

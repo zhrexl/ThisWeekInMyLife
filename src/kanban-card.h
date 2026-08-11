@@ -28,6 +28,10 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (KanbanCard, kanban_card, KANBAN, CARD, GtkListBoxRow)
 
+#define KANBAN_CARD_MIN_CONTENT_HEIGHT     80
+#define KANBAN_CARD_MAX_CONTENT_HEIGHT     600
+#define KANBAN_CARD_DEFAULT_CONTENT_HEIGHT 150
+
 KanbanCard *kanban_card_new(void);
 
 void
@@ -49,5 +53,11 @@ void kanban_card_content_dropped(KanbanCard* self);
 
 void
 kanban_card_set_description(KanbanCard* Card,const gchar* description);
+
+gint
+kanban_card_get_description_height(KanbanCard* Card);
+
+void
+kanban_card_set_description_height(KanbanCard* Card, gint height);
 
 G_END_DECLS

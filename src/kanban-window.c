@@ -23,6 +23,7 @@
 #include <glib/gi18n.h>
 
 #include "kanban-application.h"
+#include "kanban-card.h"
 #include "kanban-column.h"
 #include "json-glib/json-glib.h"
 
@@ -265,8 +266,12 @@ void create_cards_from_json(KanbanColumn* Column, JsonNode* node)
     const gchar*  description = json_object_get_string_member (objmember,
                                                               "description");
     gboolean revealed = json_object_get_boolean_member (objmember, "revealed");
+    gint description_height = KANBAN_CARD_DEFAULT_CONTENT_HEIGHT;
+    if (json_object_has_member (objmember, "description_height"))
+      description_height = json_object_get_int_member (objmember, "description_height");
 
-    kanban_column_add_new_card (Column, objectname, description, revealed);
+    kanban_column_add_new_card (Column, objectname, description, revealed,
+                                description_height);
   }
 
   g_list_free(list);

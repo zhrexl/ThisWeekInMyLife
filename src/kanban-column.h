@@ -46,7 +46,11 @@ kanban_column_remove_card(KanbanColumn* Column, gpointer card);
 void kanban_column_get_json(KanbanColumn* Column, gpointer CardObject);
 
 void
-kanban_column_add_new_card(KanbanColumn* Column, const gchar* title, const gchar* description, gboolean revealed);
+kanban_column_add_new_card (KanbanColumn *Column,
+                            const gchar  *title,
+                            const gchar  *description,
+                            gboolean      revealed,
+                            gint          description_height);
 
 void kanban_column_insert_card(KanbanColumn *Column, double y, gpointer card);
 

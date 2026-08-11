@@ -86,9 +86,10 @@
             <child>
               <object class="GtkRevealer" id="revealercard">
               <child>
-                <object class="GtkBox">
+                <object class="GtkBox" id="revealContent">
                   <property name="orientation">vertical</property>
                   <property name="vexpand-set">true</property>
+                  <!-- Keep in sync with KANBAN_CARD_DEFAULT_CONTENT_HEIGHT in kanban-card.h -->
                   <property name="height-request">150</property>
                   <child>
                     <object class="GtkSeparator"></object>
@@ -134,6 +135,16 @@
                           <signal name="clicked" handler="insert_checkbox" object="description" swapped="no"/>
                         </object>
                       </child>
+                    </object>
+                  </child>
+                  <child>
+                    <object class="GtkBox" id="resizeHandle">
+                      <property name="halign">center</property>
+                      <property name="height-request">10</property>
+                      <property name="tooltip-text">Drag to resize</property>
+                      <style>
+                        <class name="resize-handle"/>
+                      </style>
                     </object>
                   </child>
                 </object>
