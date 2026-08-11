@@ -89,6 +89,7 @@
                 <object class="GtkBox" id="revealContent">
                   <property name="orientation">vertical</property>
                   <property name="vexpand-set">true</property>
+                  <!-- Keep in sync with KANBAN_CARD_DEFAULT_CONTENT_HEIGHT in kanban-card.h -->
                   <property name="height-request">150</property>
                   <child>
                     <object class="GtkSeparator"></object>
